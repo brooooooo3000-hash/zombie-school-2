@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Зомби-школа 2</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0a0c22;color:#fff;font-family:Verdana,Tahoma,sans-serif;
+    touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .hide{display:none!important}
+  #hud{position:fixed;inset:0;pointer-events:none}
+  #hearts{position:absolute;left:14px;top:8px;font-size:30px;letter-spacing:3px;text-shadow:2px 2px 0 #000}
+  #place{position:absolute;left:14px;top:46px;font-size:14px;font-weight:bold;text-shadow:2px 2px 0 #000}
+  #weapon{position:absolute;right:14px;top:12px;font-size:17px;font-weight:bold;text-align:right;text-shadow:2px 2px 0 #000}
+  #goal{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:rgba(10,12,34,.78);padding:6px 12px;
+    border-radius:8px;font-size:13px;text-align:center;width:max-content;max-width:86%}
+  #msg{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-size:22px;font-weight:bold;text-align:center;
+    text-shadow:2px 2px 0 #000;width:90%}
+  #hint{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);font-size:16px;font-weight:bold;
+    text-shadow:2px 2px 0 #000;white-space:nowrap}
+  #cross{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;box-shadow:0 0 0 2px #000}
+  #map{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:min(620px,92vw);height:auto}
+  #boss{position:absolute;left:50%;top:112px;transform:translateX(-50%);width:min(440px,70%);text-align:center;font-weight:bold;
+    font-size:14px;text-shadow:2px 2px 0 #000}
+  #bossbar{height:16px;background:#4a1620;border:3px solid #000;margin-bottom:3px}
+  #bossfill{height:100%;background:#e63c50;width:100%}
+  #hurt{position:absolute;inset:0;box-shadow:inset 0 0 90px 30px rgba(230,30,50,.85);opacity:0}
+  #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:15;display:flex;align-items:center;justify-content:center;
+    font-size:34px;font-weight:bold;color:#96e678}
+  .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    background:linear-gradient(rgba(10,12,34,.93),rgba(62,36,80,.86));padding:16px;box-sizing:border-box;overflow:auto;z-index:20}
+  h1{font-size:clamp(34px,7vw,64px);margin:0 0 4px;color:#96e678;text-shadow:4px 4px 0 #000;letter-spacing:1px}
+  h2{font-size:clamp(18px,3vw,26px);margin:0 0 14px;color:#ffe178}
+  p{max-width:660px;line-height:1.5;margin:6px 0 14px;font-size:clamp(13px,2.2vw,17px);color:#d6dcf5}
+  button.big{font:bold 19px Verdana,Tahoma,sans-serif;color:#fff;background:#2c3a64;border:3px solid #ffe178;border-radius:10px;
+    padding:11px 34px;margin:6px;cursor:pointer}
+  button.big:hover{background:#4e64a5}
+  button.small{font:bold 14px Verdana,Tahoma,sans-serif;color:#fff;background:#2c3a64;border:2px solid #5f698c;border-radius:8px;
+    padding:7px 16px;margin:4px;cursor:pointer}
+  #keys{font-size:13px;color:#9aa4cc}
+  #touch{position:fixed;inset:0;z-index:10;pointer-events:none}
+  #stick{position:absolute;left:22px;bottom:22px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.12);
+    border:3px solid rgba(255,255,255,.35);pointer-events:auto}
+  #knob{position:absolute;left:40px;top:40px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.5)}
+  .tb{position:absolute;border-radius:50%;background:rgba(255,255,255,.16);border:3px solid rgba(255,255,255,.4);color:#fff;
+    font:bold 13px Verdana,Tahoma,sans-serif;display:flex;align-items:center;justify-content:center;pointer-events:auto;text-align:center}
+  #tHit{right:22px;bottom:30px;width:96px;height:96px}
+  #tJump{right:134px;bottom:22px;width:70px;height:70px}
+  #tSwap{right:30px;bottom:142px;width:70px;height:70px;font-size:11px}
+  #tDoor{right:126px;bottom:112px;width:76px;height:76px;font-size:12px;border-color:#ffe178}
+  #tPause{right:14px;top:62px;width:42px;height:42px}
+  /* телефон боком: цель вверху между сердцами и оружием, карта внизу между джойстиком и кнопками */
+  body.touch #map{bottom:8px;width:min(300px,37vw);opacity:.85}
+  body.touch #goal{top:6px;font-size:11px;max-width:46%}
+  body.touch #msg{top:34%;font-size:16px}
+  body.touch #boss{top:50px}
+  body.touch #hint{display:none}
+  @media (orientation:portrait){body.touch #map{bottom:auto;top:154px;width:86vw}
+    body.touch #goal{top:98px;max-width:90%} body.touch #boss{top:208px} body.touch #tPause{top:44px}}
+  @media (max-height:420px){.screen h1{font-size:34px}.screen h2{font-size:17px;margin-bottom:6px}
+    .screen p{font-size:12px;margin:2px 0 6px} #keys{font-size:11px} button.big{padding:8px 28px;margin:3px}}
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="hud" class="hide">
+  <div id="hurt"></div>
+  <div id="hearts"></div>
+  <div id="place"></div>
+  <div id="weapon"></div>
+  <div id="goal"></div>
+  <div id="boss" class="hide"><div id="bossbar"><div id="bossfill"></div></div><span id="bossname"></span></div>
+  <div id="msg"></div>
+  <div id="hint"></div>
+  <canvas id="map" width="620" height="76"></canvas>
+  <div id="cross"></div>
+</div>
+<div id="fade"></div>
+
+<div id="touch" class="hide">
+  <div id="stick"><div id="knob"></div></div>
+  <div class="tb" id="tHit"></div>
+  <div class="tb" id="tJump"></div>
+  <div class="tb" id="tSwap"></div>
+  <div class="tb hide" id="tDoor"></div>
+  <div class="tb" id="tPause">II</div>
+</div>
+
+<div id="menu" class="screen">
+  <h1 data-t="title"></h1>
+  <h2 data-t="sub"></h2>
+  <p data-t="story"></p>
+  <button class="big" id="bPlay" data-t="play"></button>
+  <div><button class="small" id="bLang">Русский</button></div>
+  <p id="keys"></p>
+</div>
+<div id="pause" class="screen hide">
+  <h2 data-t="paused"></h2>
+  <button class="big" id="bResume" data-t="resume"></button>
+  <button class="small" id="bQuit" data-t="toMenu"></button>
+</div>
+<div id="dead" class="screen hide">
+  <h1 data-t="dead"></h1>
+  <p data-t="deadText"></p>
+  <button class="big" id="bRetry" data-t="retry"></button>
+  <button class="small" id="bQuit2" data-t="toMenu"></button>
+</div>
+<div id="win" class="screen hide">
+  <h1 data-t="win"></h1>
+  <p data-t="winText"></p>
+  <button class="big" id="bAgain" data-t="again"></button>
+</div>
+<div id="error" class="screen hide"><p id="errText">3D-движок не загрузился. Проверь интернет и обнови страницу.<br>The 3D engine did not load. Check your internet connection.<br>3D 엔진을 불러오지 못했어요. 인터넷을 확인하세요.</p></div>
+
+<script>
+// если в игре случится ошибка, покажем её на экране (так проще починить)
+window.addEventListener('error',function(e){
+  var box=document.getElementById('error');if(!box||!e.message)return;box.classList.remove('hide');
+  document.getElementById('errText').textContent='Ошибка в игре: '+e.message+' (строка '+e.lineno+')';
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+if(!window.THREE){$('menu').classList.add('hide');$('error').classList.remove('hide');throw new Error('no three.js');}
+
+/* ====================== ЯЗЫКИ ====================== */
+const LANGS=['ru','en','ko'], LANG_NAMES={ru:'Русский',en:'English',ko:'한국어'};
+const T={
+ title:['ЗОМБИ-ШКОЛА 2','ZOMBIE SCHOOL 2','좀비 학교 2'],
+ sub:['Новая школа в Пусане','A new school in Busan','부산의 새 학교'],
+ story:['Ты остался в Пусане у бабушки. Первый день в новой школе, а она тоже живая. Пять этажей, ходи где хочешь. Чтобы всё закончить, найди ключ и победи директора.',
+        'You stayed in Busan with grandma. First day at the new school, and it is alive too. Five floors, go wherever you like. To end it all, find the key and defeat the principal.',
+        '너는 부산 할머니 댁에 남았다. 새 학교의 첫날, 이 학교도 살아 있다. 5층 어디든 갈 수 있다. 끝내려면 열쇠를 찾아 교장을 물리쳐라.'],
+ play:['Играть','Play','시작'], paused:['Пауза','Paused','일시 정지'], resume:['Продолжить','Resume','계속하기'],
+ toMenu:['В меню','Menu','메뉴'], dead:['Зомби победили','The zombies won','좀비가 이겼다'],
+ deadText:['Ты очнёшься в классе поддержки на 1 этаже. Оружие и ключ останутся.',
+           'You will wake up in the support class on floor 1. You keep your weapons and the key.','1층 도움반에서 깨어나요. 무기와 열쇠는 그대로예요.'],
+ retry:['Ещё раз','Try again','다시 하기'], win:['ПОБЕДА!','VICTORY!','승리!'],
+ winText:['Директор повержен, новая школа затихла. Но из спортзала кто-то стучит... Продолжение следует.',
+          'The principal is defeated and the new school has calmed down. But someone is knocking from the gym... To be continued.',
+          '교장을 물리치자 새 학교가 조용해졌다. 그런데 체육관에서 누군가 문을 두드린다... 다음에 계속.'],
+ again:['Играть снова','Play again','다시 플레이'],
+ keysPC:['WASD — ходить, мышь — смотреть, ЛКМ — удар, E — дверь, пробел — прыжок, Shift — бег, Q или 1-6 — оружие, Esc — пауза',
+         'WASD — move, mouse — look, left click — attack, E — door, Space — jump, Shift — run, Q or 1-6 — weapon, Esc — pause',
+         'WASD 이동, 마우스 시점, 왼쪽 클릭 공격, E 문, 스페이스 점프, Shift 달리기, Q 또는 1-6 무기, Esc 일시 정지'],
+ keysTouch:['Слева — джойстик, веди пальцем по экрану, чтобы смотреть. Кнопки справа: удар, прыжок, смена, дверь.',
+            'Left: joystick. Drag on the screen to look. Right buttons: attack, jump, swap, door.',
+            '왼쪽은 조이스틱, 화면을 드래그해서 둘러봐요. 오른쪽 버튼: 공격, 점프, 교체, 문.'],
+ rotate:['Удобнее держать телефон боком.','Hold your phone sideways.','휴대폰을 가로로 잡으면 편해요.'],
+ hit:['УДАР','HIT','공격'], jump:['ПРЫЖОК','JUMP','점프'], swap:['СМЕНА','SWAP','교체'], door:['ДВЕРЬ','DOOR','문'],
+ openHint:['E — открыть дверь','E — open the door','E — 문 열기'], closeHint:['E — закрыть дверь','E — close the door','E — 문 닫기'],
+ lockedHint:['E — заперто','E — locked','E — 잠겨 있음'],
+ goalKey:['Найди ключ от кабинета директора (учительская, 3 этаж)','Find the key to the principal’s office (teachers’ room, floor 3)','교장실 열쇠를 찾아요 (3층 교무실)'],
+ goalOffice:['Иди в кабинет директора (2 этаж)','Go to the principal’s office (floor 2)','교장실로 가요 (2층)'],
+ goalBoss:['Победи директора','Defeat the principal','교장을 물리쳐요'],
+ floor:['Этаж {n}','Floor {n}','{n}층'], corridor:['Коридор','Hallway','복도'], stairs:['Лестница','Stairs','계단'],
+ locked:['Заперто. Нужен ключ из учительской','Locked. You need the key from the teachers’ room','잠겨 있어요. 교무실의 열쇠가 필요해요'],
+ unlocked:['Ключ подошёл!','The key fits!','열쇠가 맞아요!'],
+ gotKey:['Ключ от кабинета директора у тебя!','You have the key to the principal’s office!','교장실 열쇠를 얻었어요!'],
+ npc:['Парень в очках: «Не мешай, я делаю игру. Я неповторимый!»','Guy in glasses: “Don’t distract me, I’m making a game. One of a kind!”',
+      '안경 쓴 아이: “방해하지 마, 게임 만드는 중이야. 세상에 하나뿐인 나!”'],
+ safe:['Класс поддержки: здесь безопасно','Support class: you are safe here','도움반: 여기는 안전해요'],
+ giant:['Гигант! У него на спине мелкий','Giant! There is a little one on his back','거인이다! 등에 꼬마가 붙어 있어요'],
+ impThrow:['Гигант бросил мелкого!','The giant threw the little one!','거인이 꼬마를 던졌어요!'],
+ bossName:['ДИРЕКТОР-ЗОМБИ','ZOMBIE PRINCIPAL','좀비 교장'],
+ strictName:['СТРОГИЙ УЧИТЕЛЬ АНГЛИЙСКОГО','STRICT ENGLISH TEACHER','엄격한 영어 선생님'],
+ bossStart:['Директор: «Опять опоздал?!»','Principal: “Late again?!”','교장: “또 지각이야?!”'],
+ strictStart:['“Speak English!”','“Speak English!”','“Speak English!”'],
+ bossHelp:['Директор зовёт подмогу!','The principal calls for help!','교장이 도움을 불러요!'],
+ got:['Подобрано: ','Picked up: ','획득: '],
+ pie:['Пирожок: +1 сердце','Pie: +1 heart','파이: 하트 +1'],
+ empty:['Заряды кончились','Out of ammo','탄약이 떨어졌어요'],
+ fists:['Кулаки','Fists','주먹'], ruler:['Линейка','Ruler','자'], mop:['Швабра','Mop','대걸레'], chair:['Стул','Chair','의자'],
+ watergun:['Водяной пистолет','Water gun','물총'], piebomb:['Пирожковая бомба','Pie bomb','파이 폭탄'],
+ r_support:['Класс поддержки','Support class','도움반'], r_korean:['Класс корейского','Korean class','국어 교실'],
+ r_first:['Первоклассники','First graders','1학년 놀이방'], r_office:['Кабинет директора','Principal’s office','교장실'],
+ r_canteen:['Столовая','Cafeteria','급식실'], r_cls:['Класс {n}','Class {n}','{n}반'],
+ r_hall:['Актовый зал','Assembly hall','강당'], r_teachers:['Учительская','Teachers’ room','교무실'],
+ r_english:['Зал английского','English hall','영어 체험실'], r_strict:['Строгий английский','Strict English','엄격한 영어 교실'],
+ r_pe:['Физкультура {n}','PE room {n}','체육실 {n}'], r_science:['Класс науки','Science room','과학실']
+};
+let lang='ru';
+try{const s=localStorage.getItem('zs2_lang');
+  lang=LANGS.includes(s)?s:(LANGS.includes((navigator.language||'').slice(0,2))?navigator.language.slice(0,2):'en');}catch(e){}
+const tr=(k,n)=>T[k][LANGS.indexOf(lang)].replace('{n}',(n===undefined||n===null)?'':n);
+const isTouch=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||('ontouchstart' in window)||location.search.indexOf('touch')>=0;
+if(isTouch)document.body.classList.add('touch');
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-t]').forEach(e=>e.textContent=tr(e.dataset.t));
+  $('bLang').textContent=LANG_NAMES[lang];
+  $('keys').textContent=tr(isTouch?'keysTouch':'keysPC')+(isTouch?' '+tr('rotate'):'');
+  $('tHit').textContent=tr('hit');$('tJump').textContent=tr('jump');$('tSwap').textContent=tr('swap');$('tDoor').textContent=tr('door');
+  drawSigns();
+}
+
+/* ====================== ЗВУК (рисуется кодом) ====================== */
+let AC=null;
+function beep(freq,dur,type,vol,slide){
+  if(!AC)return;
+  const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;
+  o.type=type||'square';o.frequency.setValueAtTime(freq,t);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,slide),t+dur);
+  g.gain.setValueAtTime(vol||0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+dur);
+}
+const SND={swing:()=>beep(320,0.08,'triangle',0.05,120),hit:()=>beep(160,0.12,'square',0.08,60),
+  shot:()=>beep(700,0.09,'sine',0.07,260),boom:()=>beep(120,0.45,'sawtooth',0.14,30),hurt:()=>beep(220,0.25,'sawtooth',0.12,70),
+  pick:()=>{beep(520,0.1,'square',0.06);setTimeout(()=>beep(780,0.12,'square',0.06),80);},
+  die:()=>beep(200,0.3,'triangle',0.08,45),door:()=>beep(240,0.22,'triangle',0.06,150),roar:()=>beep(75,0.7,'sawtooth',0.13,45),
+  step:()=>beep(140,0.25,'triangle',0.06,320)};
+
+/* ====================== СЦЕНА ====================== */
+const canvas=$('view');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!isTouch});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0a0c22);
+scene.fog=new THREE.Fog(0x2a2040,22,46);
+const camera=new THREE.PerspectiveCamera(74,1,0.05,70);
+camera.rotation.order='YXZ';
+scene.add(camera);
+scene.add(new THREE.HemisphereLight(0xffffff,0xb4a8a0,0.76));
+const sun=new THREE.DirectionalLight(0xffffff,0.38);sun.position.set(5,9,6);scene.add(sun);
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  camera.fov=w<h?90:74;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,200));resize();
+
+/* ----- мультяшный стиль: плавные картинки, «ступенчатый» свет и чёрные контуры; цвета как в первой части ----- */
+function canvasTex(w,h,draw,rx,ry){
+  const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);
+  const t=new THREE.CanvasTexture(c);t.anisotropy=4;
+  if(rx){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);}
+  return t;
+}
+const gradCanvas=document.createElement('canvas');gradCanvas.width=4;gradCanvas.height=1;
+['#8a8a8a','#b4b4b4','#e6e6e6','#ffffff'].forEach((c,i)=>{const g=gradCanvas.getContext('2d');g.fillStyle=c;g.fillRect(i,0,1,1);});
+const gradient=new THREE.CanvasTexture(gradCanvas);gradient.magFilter=gradient.minFilter=THREE.NearestFilter;gradient.generateMipmaps=false;
+const lam=opt=>new THREE.MeshToonMaterial(Object.assign({gradientMap:gradient},opt));
+const matCache={},texCache={};
+const col=c=>matCache[c]||(matCache[c]=lam({color:c}));
+const asMat=m=>typeof m==='number'?col(m):m;
+const INK=0x1e1e28;
+const inkMat=new THREE.MeshBasicMaterial({color:INK,side:THREE.BackSide});
+const lineMat=new THREE.LineBasicMaterial({color:INK});
+let target=scene;   // куда складывать новые предметы (при стройке этажа — в его комнату)
+function add(geo,mat,x,y,z,parent){const m=new THREE.Mesh(geo,asMat(mat));m.position.set(x,y,z);(parent||target).add(m);return m;}
+function box(w,h,d,mat,x,y,z,parent){return add(new THREE.BoxGeometry(w,h,d),mat,x,y,z,parent);}
+function edged(m){m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),lineMat));return m;}
+function ball(r,mat,x,y,z,parent,ink){const m=add(new THREE.SphereGeometry(r,16,12),mat,x,y,z,parent);
+  if(ink)m.add(new THREE.Mesh(new THREE.SphereGeometry(r+ink,16,12),inkMat));return m;}
+function tube(r1,r2,h,mat,x,y,z,parent,ink){const m=add(new THREE.CylinderGeometry(r1,r2,h,14),mat,x,y,z,parent);
+  if(ink)m.add(new THREE.Mesh(new THREE.CylinderGeometry(r1+ink,r2+ink,h+ink*2,14),inkMat));return m;}
+function plane(w,h,mat,x,y,z,ry,parent){const m=add(new THREE.PlaneGeometry(w,h),mat,x,y,z,parent);m.rotation.y=ry||0;return m;}
+const flat=opt=>new THREE.MeshBasicMaterial(opt);
+
+/* ====================== ПЕРСОНАЖИ (мультяшные) ====================== */
+/* круглый человечек: ноги внизу (y=0), смотрит вдоль +z */
+function humanoid(o){
+  const g=new THREE.Group();
+  g.rotation.order='YXZ';
+  const skin=lam({color:o.skin}),shirt=lam({color:o.shirt}),pants=lam({color:o.pants});
+  const L=0.028,R=o.headR,legs=[],arms=[];
+  const top=o.belly?o.legH+o.belly*1.62:o.legH+o.torsoH;
+  const shoulderY=o.belly?o.legH+o.belly*1.15:o.legH+o.torsoH*0.84;
+  const shoulderX=o.belly?o.belly*0.95:o.torsoR+o.armR*0.8;
+  const legX=o.belly?o.belly*0.45:o.torsoR*0.5;
+  [-1,1].forEach(s=>{const p=new THREE.Group();p.position.set(s*legX,o.legH+0.05,0);g.add(p);legs.push(p);
+    tube(o.legR,o.legR*0.8,o.legH,pants,0,-o.legH/2,0,p,L);
+    const shoe=ball(o.legR*1.2,0x468c50,0,-o.legH+o.legR*0.55,o.legR*0.55,p,L);shoe.scale.set(1,0.65,1.35);});
+  if(o.belly){ball(o.belly,shirt,0,o.legH+o.belly*0.82,0,g,L*1.4);
+    const patch=ball(o.belly*0.62,0xebaf78,0,o.legH+o.belly*0.7,o.belly*0.5,g);patch.scale.set(1,0.85,0.9);
+    ball(0.05,INK,0,o.legH+o.belly*0.7,o.belly*1.06,g);}
+  else{tube(o.torsoR*1.08,o.torsoR*0.76,o.torsoH,shirt,0,o.legH+o.torsoH/2,0,g,L);
+    const dome=ball(o.torsoR*1.08,shirt,0,o.legH+o.torsoH,0,g,L);dome.scale.y=0.45;}
+  [-1,1].forEach(s=>{const p=new THREE.Group();p.position.set(s*shoulderX,shoulderY,0);g.add(p);arms.push(p);
+    ball(o.armR*1.3,shirt,0,0,0,p,L);
+    const a=tube(o.armR*1.15,o.armR*1.15,o.armL*0.4,shirt,0,0,o.armL*0.2,p,L);a.rotation.x=Math.PI/2;
+    const b=tube(o.armR*0.85,o.armR,o.armL*0.62,skin,0,0,o.armL*0.68,p,L);b.rotation.x=Math.PI/2;
+    ball(o.armR*1.55,skin,0,0,o.armL,p,L);});
+  const head=new THREE.Group();head.position.set(0,top+R*0.82,0.02);g.add(head);
+  ball(R,skin,0,0,0,head,L*1.3);
+  const big=o.eyes||1;
+  [-1,1].forEach(s=>{
+    ball(R*0.3*big*(s<0?1.12:0.92),o.eyeColor||0xf0e646,s*R*0.37,R*0.12,R*0.8,head,0.014);
+    ball(R*0.1,o.pupil||INK,s*R*0.37,R*0.1,R*(0.8+0.3*big),head);
+    const brow=box(R*0.5,R*0.1,R*0.12,INK,s*R*0.42,R*0.52,R*0.92,head);brow.rotation.z=s*(o.brow===undefined?0.38:o.brow);});
+  const mouth=ball(R*0.4,0xc8283c,0,-R*0.45,R*0.72,head,0.012);mouth.scale.set(1,0.52,0.55);
+  [-1,1].forEach(s=>box(R*0.13,R*0.17,R*0.06,0xffffff,s*R*0.16,-R*0.33,R*0.95,head));
+  if(o.hair!==null)[[-0.35,0.45],[0.05,-0.1],[0.4,-0.5]].forEach(h=>{
+    const sp=tube(0,R*0.17,R*0.55,o.hair||0x468c50,h[0]*R,R*1.06,-R*0.05,head,0.012);sp.rotation.z=h[1];});
+  return {g,legs,arms,head,mats:[skin,shirt,pants]};
+}
+function makeModel(kind){
+  const o={skin:0x6ebe6e,shirt:0x96506e,pants:0x464664,legH:0.6,legR:0.13,torsoH:0.62,torsoR:0.27,headR:0.33,armR:0.085,armL:0.62};
+  if(kind==='tall')Object.assign(o,{shirt:0x7864af,legH:1.1,legR:0.1,torsoH:0.75,torsoR:0.23,headR:0.28,armR:0.07,armL:1.35});
+  if(kind==='fat')Object.assign(o,{shirt:0xd28246,pants:0x50506e,legH:0.34,legR:0.19,belly:0.68,headR:0.34,armR:0.15,armL:0.52,brow:0.15});
+  if(kind==='giant')Object.assign(o,{shirt:0x7d3c4b,pants:0x464669,legH:1.0,legR:0.26,torsoH:1.0,torsoR:0.62,headR:0.44,armR:0.2,armL:1.15,brow:0.5,eyeColor:0xffffff,pupil:0xdc283c});
+  if(kind==='imp')Object.assign(o,{skin:0x96d25a,shirt:0x5f4682,pants:0x3c325a,legH:0.22,legR:0.08,torsoH:0.26,torsoR:0.17,headR:0.29,armR:0.05,armL:0.32,eyes:1.2,eyeColor:0xffffff,pupil:0xdc283c,hair:null});
+  if(kind==='boss')Object.assign(o,{shirt:0x373755,pants:0x23233c,legH:0.95,legR:0.17,torsoH:0.95,torsoR:0.42,headR:0.38,armR:0.12,armL:0.9,hair:null,brow:0.55});
+  if(kind==='strict')Object.assign(o,{shirt:0x8c3c5a,pants:0x32324a,legH:0.9,legR:0.12,torsoH:0.85,torsoR:0.3,headR:0.34,armR:0.08,armL:0.8,hair:null,brow:0.6});
+  const m=humanoid(o),R=o.headR;
+  if(kind==='imp')[-1,1].forEach(s=>{const h=tube(0,R*0.2,R*0.6,0x96283c,s*R*0.62,R*0.95,0,m.head,0.012);h.rotation.z=-s*0.45;});
+  if(kind==='boss'||kind==='strict'){
+    if(kind==='boss'){
+      const shirt=box(0.28,0.62,0.05,0xebebf0,0,o.legH+0.62,o.torsoR*0.98,m.g);shirt.rotation.x=0.1;
+      const tie=tube(0.035,0.1,0.6,0xd22d37,0,o.legH+0.56,o.torsoR*1.08,m.g,0.015);tie.scale.z=0.35;tie.rotation.x=0.1;
+      [-1,1].forEach(s=>{const side=ball(R*0.36,0xc8c8cd,s*R*0.9,R*0.2,-R*0.1,m.head,0.015);side.scale.y=1.15;});}
+    else{ball(R*0.55,0x50321e,0,R*1.05,-R*0.35,m.head,0.015);const cap=ball(R*1.04,0x50321e,0,R*0.12,-R*0.16,m.head);cap.scale.z=0.9;
+      box(0.06,0.06,0.9,0x965f32,0,0,o.armL+0.35,m.arms[1]);}
+    [-1,1].forEach(s=>add(new THREE.TorusGeometry(R*0.34,0.022,8,18),INK,s*R*0.37,R*0.12,R*1.14,m.head));
+    box(R*0.2,0.025,0.025,INK,0,R*0.16,R*1.14,m.head);}
+  return m;
+}
+
+/* ====================== ШКОЛА: пять этажей, корейские коридоры ====================== */
+const DEPTH=9, CORR=7, ROOM_H=3.6, DOOR_W=1.6, STAIR=6;
+const room=(type,id,w)=>({type,id,w:w||9});
+const cls=n=>room('cls',n);
+const PLAN=[
+  [room('support'),room('korean'),room('first','1'),room('first','2')],
+  [room('office'),room('canteen',null,18),cls('1-1'),cls('1-2'),cls('1-3'),cls('1-4'),cls('2-1'),cls('2-2'),cls('2-3'),cls('2-4')],
+  [cls('3-1'),cls('3-2'),cls('3-3'),cls('3-4'),cls('4-1'),room('hall',null,18),room('teachers')],
+  [cls('4-2'),cls('4-3'),cls('4-4'),cls('5-1'),cls('5-2'),cls('5-3'),cls('5-4'),room('english',null,18)],
+  [room('strict'),room('pe','1',13),room('pe','2',13),room('science')]
+];
+/* кто где живёт: [вид, x от левой стены, z] и что лежит: [вещь, x, z] */
+PLAN.forEach(f=>f.splice(Math.ceil(f.length/2),0,room('stairs',null,10)));   // главная лестница посередине
+const CONTENT={
+  stairs:{e:[],i:[]},
+  korean:{e:[['zombie',4,-6],['zombie',6.4,-4]],i:[['ruler',2.4,-7.6]]},
+  first:{e:[['zombie',4.4,-5],['imp',6.4,-6.5]],i:[['pie',2.4,-7.5]]},
+  support:{e:[],i:[['pie',3,-6],['pie',6,-6]]},
+  cls:{e:[['zombie',4.4,-4],['zombie',6.4,-7],['tall',2.4,-8]],i:[]},
+  office:{e:[['boss',4.5,-7]],i:[['pie',1.4,-8],['pie',7.6,-8]]},
+  canteen:{e:[['fat',6,-5],['fat',12,-6],['zombie',9,-3],['zombie',15,-5],['zombie',4,-7]],
+           i:[['watergun',9,-7.6],['pie',5,-4.2],['pie',9,-4.2],['pie',13,-4.2]]},
+  hall:{e:[['giant',8,-6],['zombie',11,-3.4],['zombie',14,-6],['tall',15,-3.4]],i:[['piebomb',2,-6],['pie',16,-7.8]]},
+  teachers:{e:[['giant',5.5,-5],['tall',7,-7.5]],i:[['key',3.2,-7],['chair',7.6,-2.6],['pie',2,-2.6]]},
+  english:{e:[['zombie',5,-5],['zombie',8,-7],['zombie',11,-4],['tall',14,-6],['zombie',15,-3.4]],i:[['piebomb',9,-7.8],['pie',2.4,-7.8]]},
+  strict:{e:[['strict',2.6,-3.4],['zombie',6.4,-7],['zombie',5.4,-3]],i:[['pie',7.6,-7.8]]},
+  pe:{e:[['tall',5,-6],['tall',9,-4],['zombie',10.5,-7]],i:[['chair',3,-7.6],['watergun',11.4,-2.6]]},
+  science:{e:[['zombie',3.4,-5.4],['imp',5.5,-4],['imp',5.3,-8]],i:[['piebomb',5.3,-6],['piebomb',7.6,-2.6]]}
+};
+const CLASS_ITEMS={'1-2':[['chair',2.4,-7.8]],'1-4':[['pie',7.6,-7.8]],'2-3':[['ruler',2.4,-7.8]],'3-2':[['mop',2.4,-7.8]],
+  '3-4':[['pie',2.4,-7.8]],'4-3':[['pie',7.6,-7.8]],'5-1':[['watergun',2.4,-7.8]],'5-3':[['mop',7.6,-7.8]]};
+const CLASS_WALLS=[['#f5e1aa','#e1c88c'],['#e2f0cd','#c8dcaf'],['#f2d8d6','#debebe']];
+const WALLS={corr:['#e2f0cd','#c8dcaf'],office:['#7d4842','#55302c','#6c3c37'],canteen:['#ffe6ae','#e1b478'],hall:['#d2c3e6','#96829f'],
+  teachers:['#cde6f0','#a5c3d2'],english:['#f2d8d6','#debebe'],strict:['#cdc8d2','#968ca0'],pe:['#f0d2a0','#c89664'],
+  science:['#d2ebe6','#9bc8c3'],support:['#fff0c8','#bee1b4'],stairs:['#e2f0cd','#c8dcaf']};
+function floorDraw(color,line){return (g,w,h)=>{g.fillStyle=color;g.fillRect(0,0,w,h);g.fillStyle=line;
+  for(let x=0;x<w;x+=32)g.fillRect(x,0,4,h);for(let y=32;y<h;y+=36)g.fillRect(0,y,w,4);};}
+function tiles(a,b,line){return (g,w,h)=>{g.fillStyle=a;g.fillRect(0,0,w,h);g.fillStyle=b;g.fillRect(0,0,w/2,h/2);g.fillRect(w/2,h/2,w/2,h/2);
+  g.fillStyle=line;g.fillRect(0,0,w,2);g.fillRect(0,h/2,w,2);g.fillRect(0,0,2,h);g.fillRect(w/2,0,2,h);};}
+function wallDraw(c){return (g,w,h)=>{g.fillStyle=c[0];g.fillRect(0,0,w,h);
+  if(c[2]){g.fillStyle=c[2];g.fillRect(0,0,w/2,h);}
+  g.fillStyle=c[1];g.fillRect(0,h*0.7,w,h*0.3);g.fillStyle='#1e1e28';g.fillRect(0,h*0.7,w,h*0.016);g.fillRect(0,h*0.985,w,h*0.015);};}
+function wallMat(c,len){const n=Math.max(1,Math.round(len/2)),key=c.join()+n;
+  return texCache[key]||(texCache[key]=lam({map:canvasTex(128,256,wallDraw(c),n,1)}));}
+function floorMat(key,draw,w,d){const k=key+Math.round(w)+'x'+Math.round(d);
+  return texCache[k]||(texCache[k]=lam({map:canvasTex(128,128,draw,w/2,d/2)}));}
+
+const floors=[];       // построенные этажи
+let F=null;            // этаж, на котором герой
+let colliders=[],enemies=[],pickups=[];
+const signs=[];        // таблички и доски: их надписи меняются вместе с языком
+let building=null;
+function solid(x0,x1,z0,z1,top){const c={x0,x1,z0,z1,top,off:false};building.colliders.push(c);return c;}
+function wall(x0,x1,z0,z1,c){const w=x1-x0,d=z1-z0;box(w,ROOM_H,d,wallMat(c,Math.max(w,d)),(x0+x1)/2,ROOM_H/2,(z0+z1)/2);solid(x0,x1,z0,z1,ROOM_H);}
+function floorPlane(x0,x1,z0,z1,key,draw){const m=add(new THREE.PlaneGeometry(x1-x0,z1-z0),floorMat(key,draw,x1-x0,z1-z0),(x0+x1)/2,0,(z0+z1)/2);m.rotation.x=-Math.PI/2;}
+function label(w,h,cw,ch,x,y,z,ry,draw){   // плоскость с надписью, которую можно перерисовать на другом языке
+  const c=document.createElement('canvas');c.width=cw;c.height=ch;const tex=new THREE.CanvasTexture(c);tex.anisotropy=4;
+  const m=plane(w,h,flat({map:tex}),x,y,z,ry);const s={c,tex,draw};signs.push(s);drawSign(s);return m;
+}
+function drawSign(s){const g=s.c.getContext('2d');g.clearRect(0,0,s.c.width,s.c.height);s.draw(g,s.c.width,s.c.height);s.tex.needsUpdate=true;}
+function drawSigns(){signs.forEach(drawSign);}
+function textFit(g,text,cx,cy,max,size,color){g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';
+  do{g.font='bold '+size+'px Verdana,sans-serif';size-=2;}while(g.measureText(text).width>max&&size>9);g.fillText(text,cx,cy);}
+function roomName(r){if(r.type==='cls'){const p=r.id.split('-');return lang==='ko'?p[0]+'학년 '+p[1]+'반':tr('r_cls',r.id);}
+  return tr('r_'+r.type,r.id);}
+function boardWord(r){
+  if(r.type==='korean')return '가나다라';if(r.type==='english')return 'HELLO! ABC';if(r.type==='strict')return 'SILENCE!';
+  if(r.type==='science')return 'H₂O';if(r.type==='support')return '★ ♥ ★';if(r.type==='first')return '1 + 1 = 2';
+  return {ru:'БУРМАЛДА',en:'67',ko:'L을 가져가'}[lang];
+}
+function board(r,x,y,z,ry,w){
+  label(w,w*0.38,512,192,x,y,z,ry,(g)=>{g.fillStyle='#6e4b2d';g.fillRect(0,0,512,192);g.strokeStyle='#1e1e28';g.lineWidth=8;g.strokeRect(4,4,504,184);
+    g.fillStyle='#2d5a41';g.fillRect(20,20,472,152);g.strokeRect(20,20,472,152);textFit(g,boardWord(r),256,92,440,68,'#fffdf2');
+    g.fillStyle='#fffdf2';g.fillRect(110,142,292,5);});
+}
+const windowMats={};
+function windowMat(night){return windowMats[night]||(windowMats[night]=flat({map:canvasTex(256,160,(g,w,h)=>{
+  g.fillStyle=night?'#1c2466':'#96c8e6';g.fillRect(0,0,w,h);
+  if(night){g.fillStyle='#ebe6c8';g.beginPath();g.arc(190,48,22,0,7);g.fill();for(let i=0;i<14;i++){g.beginPath();g.arc((i*71)%w,(i*37)%110,2,0,7);g.fill();}}
+  g.strokeStyle='#1e1e28';g.lineWidth=14;g.strokeRect(0,0,w,h);g.fillStyle='#1e1e28';g.fillRect(w/2-5,0,10,h);if(!night)g.fillRect(0,h/2-5,w,10);})}));}
+
+/* ----- мебель ----- */
+function desk(x,z,w,d,color){
+  edged(box(w,0.08,d,color||0xcda064,x,0.74,z));
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(p=>box(0.06,0.7,0.06,0x785537,x+p[0]*(w/2-0.08),0.35,z+p[1]*(d/2-0.08)));
+  solid(x-w/2,x+w/2,z-d/2,z+d/2,0.78);
+}
+function chair(x,z,color){edged(box(0.42,0.06,0.42,color||0x965f32,x,0.46,z));edged(box(0.06,0.44,0.42,color||0x965f32,x+0.2,0.72,z));
+  box(0.34,0.44,0.05,0x69411e,x,0.22,z-0.17);box(0.34,0.44,0.05,0x69411e,x,0.22,z+0.17);}
+function cabinet(x,z,w,d,h,color,books){
+  edged(box(w,h,d,color,x,h/2,z));solid(x-w/2,x+w/2,z-d/2,z+d/2,h);
+  if(books)for(let k=0;k<3;k++)for(let i=-1;i<=1;i++){const c=[0xc83c3c,0x3c78c8,0xe6be3c,0x46a05a,0xaa5abe][(i+k+4)%5],y=h*0.2+k*h*0.3;
+    if(w>=d)box(w*0.24,h*0.18,0.06,c,x+i*w*0.29,y,z+d/2+0.02);
+    else[-1,1].forEach(s=>box(0.06,h*0.18,d*0.24,c,x+s*(w/2+0.02),y,z+i*d*0.29));}
+}
+function furnish(r){
+  const x=r.x0,t=r.type,c=x+r.w/2;
+  const rows=(cols,zs,w,d,color,withChair)=>cols.forEach(dx=>zs.forEach(z=>{desk(x+dx,z,w,d,color);if(withChair)chair(x+dx+0.65,z);}));
+  if(t==='cls'||t==='korean'||t==='strict'){
+    board(r,x+0.21,2,-5,Math.PI/2,4.2);desk(x+1.5,-5.6,0.8,1.5,0x825532);
+    rows([3.4,5.4,7.2],[-3,-5,-7],0.8,0.65,undefined,t!=='strict');
+    cabinet(x+r.w-0.5,-8.4,0.7,1,1.9,0x78502d,true);
+  }
+  if(t==='english'){board(r,x+0.21,2.1,-5,Math.PI/2,5);rows([4,6.4,8.8,11.2,13.6],[-3,-5.2,-7.4],0.9,0.65,0xd2a0c8,true);
+    desk(x+1.7,-5,0.8,1.6,0x825532);}
+  if(t==='first'){board(r,x+0.21,1.7,-5,Math.PI/2,3.6);
+    [[3.6,-4,0xe6783c],[6.4,-4,0x46a0dc],[3.6,-6.6,0x5abe6e],[6.4,-6.6,0xe6be3c]].forEach(p=>desk(x+p[0],p[1],1,0.8,p[2]));
+    [[1.4,-8.2,0.25,0xc83c3c],[2,-8.2,0.25,0x3c78c8],[1.7,-8.2,0.75,0xe6be3c]].forEach(p=>edged(box(0.5,0.5,0.5,p[3],x+p[0],p[2],p[1])));}
+  if(t==='support'){board(r,x+0.21,1.9,-5,Math.PI/2,3.6);
+    tube(2.2,2.2,0.03,0x78c8d2,c,0.02,-5);tube(1.4,1.4,0.04,0xf5d778,c,0.03,-5);
+    [[2,-3,0xe66e8c],[7,-3.4,0x78be78],[7.4,-7.4,0x8c82dc]].forEach(p=>{const b=ball(0.45,p[2],x+p[0],0.28,p[1],null,0.02);b.scale.y=0.6;});
+    cabinet(c,-8.5,3,0.6,1.6,0x78502d,true);desk(x+3,-6,0.9,0.7);desk(x+6,-6,0.9,0.7);}
+  if(t==='office'){board(r,c,2.2,-8.78,0,3.4);edged(box(3,0.95,1.2,0x825532,c,0.48,-4.6));solid(c-1.5,c+1.5,-5.2,-4,0.95);
+    edged(box(0.8,0.5,0.1,0x373755,c,1.22,-4.8));ball(0.15,0xd22d37,c+1,1.1,-4.5,null,0.02);
+    [0.5,r.w-0.5].forEach(dx=>[-3,-6].forEach(z=>cabinet(x+dx,z,0.7,2,2.4,0x78502d,true)));
+    [-2.6,2.6].forEach(dx=>edged(box(0.5,3,0.14,0xe6be46,c+dx,2,-8.72)));}
+  if(t==='canteen'){[-4.2,-7].forEach(z=>[4,9,14].forEach(dx=>{desk(x+dx,z,3.4,0.9,0xe2cea0);
+      edged(box(3.2,0.07,0.3,0x82694a,x+dx,0.42,z+0.75));edged(box(3.2,0.07,0.3,0x82694a,x+dx,0.42,z-0.75));}));
+    edged(box(6,1.05,0.5,0xcdd0dc,c,0.52,-8.55));[-2,0,2].forEach(dx=>{tube(0.28,0.22,0.3,0x9ba0a8,c+dx,1.2,-8.55,null,0.02);ball(0.18,0xe1a046,c+dx,1.34,-8.55);});}
+  if(t==='hall'){edged(box(3.6,0.5,6,0xa06e46,x+2,0.25,-5.9));solid(x+0.2,x+3.8,-8.9,-2.9,0.5);
+    [-8.2,-3.5].forEach(z=>edged(box(0.2,3.2,1.2,0xb43246,x+0.35,2,z)));edged(box(0.2,0.6,6,0xb43246,x+0.35,3.2,-5.9));board(r,x+0.22,1.9,-5.9,Math.PI/2,3);
+    [6.5,8.5,10.5,12.5].forEach(dx=>[-3,-5,-7].forEach(z=>chair(x+dx,z,0x3c60aa)));}
+  if(t==='teachers'){board(r,c,2.1,-8.78,0,3);[[3.2,-4],[6,-4],[3.2,-7],[6,-7]].forEach(p=>{desk(x+p[0],p[1],1.5,0.85,0xcdd0dc);
+      edged(box(0.55,0.38,0.06,0x373755,x+p[0],1.05,p[1]-0.25));chair(x+p[0],p[1]+0.75,0x464664);});
+    cabinet(x+0.5,-8.1,0.7,1.4,2.2,0x3c60aa);cabinet(x+r.w-0.5,-6,0.7,2,2.2,0x3c60aa);}
+  if(t==='pe'){[[3,-4,0x3c78c8],[7,-7,0xc83c3c],[10,-4,0x46a05a]].forEach(p=>edged(box(2.4,0.14,1.4,p[2],x+p[0],0.07,p[1])));
+    [[2,-8.2,0xf08c3c],[2.8,-8.3,0xf5f5f0],[3.5,-8.1,0xe6be3c],[11.6,-8.2,0xf08c3c]].forEach(p=>ball(0.3,p[2],x+p[0],0.3,p[1],null,0.025));
+    edged(box(1.6,1,0.1,0xf5f5f0,c,2.7,-8.72));const hoop=add(new THREE.TorusGeometry(0.34,0.04,8,20),0xf08c3c,c,2.35,-8.35);hoop.rotation.x=Math.PI/2;
+    edged(box(1.6,0.9,0.8,0x965f32,c,0.45,-5.5));solid(c-0.8,c+0.8,-5.9,-5.1,0.9);}
+  if(t==='science'){board(r,x+0.21,2,-5,Math.PI/2,3.8);[[3.8,-3.8],[6.8,-3.8],[3.8,-6.8],[6.8,-6.8]].forEach(p=>{desk(x+p[0],p[1],1.7,0.9,0x6e8c96);
+      [[-0.45,0x78e650],[0.1,0x6eaaff],[0.55,0xe682aa]].forEach((q,k)=>{tube(0.05,0.16,0.26,q[1],x+p[0]+q[0],0.92,p[1]+(k-1)*0.12,null,0.012);
+        tube(0.045,0.045,0.14,0xebf5ff,x+p[0]+q[0],1.1,p[1]+(k-1)*0.12);});});
+    cabinet(x+r.w-0.5,-8.2,0.7,1.2,2.2,0xcdd0dc,true);}
+}
+
+function makeDoor(r,cx,dir){   // раздвижная дверь: уезжает вбок вдоль стены, как окно-купе
+  const locked=r.type==='office',key='door'+locked;
+  const mat=texCache[key]||(texCache[key]=lam({map:canvasTex(128,200,(g,W,H)=>{
+    g.fillStyle=locked?'#783c3c':'#b98c5a';g.fillRect(0,0,W,H);g.strokeStyle='#1e1e28';g.lineWidth=12;g.strokeRect(6,6,W-12,H-12);
+    g.fillStyle=locked?'#55302c':'#96c8e6';g.fillRect(26,24,76,78);g.lineWidth=6;g.strokeRect(26,24,76,78);g.beginPath();g.moveTo(64,24);g.lineTo(64,102);g.stroke();
+    g.fillStyle=locked?'#fadc3c':'#69411e';g.fillRect(100,114,14,34);g.strokeRect(26,150,76,30);})}));
+  const mesh=edged(box(DOOR_W+0.04,2.6,0.07,mat,cx,1.3,dir>0?0.27:0.36,building.group));
+  const d={x:cx,dir,amt:0,open:false,locked,room:r,mesh,col:null};
+  d.col=solid(cx-DOOR_W/2,cx+DOOR_W/2,-0.2,0.2,ROOM_H);building.doors.push(d);return d;
+}
+
+function mainStairs(r){   // широкий проём без дверей: левая половина — вверх, правая — вниз
+  const x0=r.x0,x1=r.x1,mid=(x0+x1)/2,wc=WALLS.stairs,n=r.floor,up=n<PLAN.length,down=n>1,half=r.w/2-0.4;
+  floorPlane(x0,x1,-DEPTH,0,'hall',tiles('#afbec8','#96a8b4','#7d8c98'));
+  wall(x0-0.1,x0+0.1,-DEPTH,0.2,wc);wall(x1-0.1,x1+0.1,-DEPTH,0.2,wc);wall(x0,x1,-DEPTH-0.2,-DEPTH+0.2,wc);
+  for(let i=0;i<8;i++){const z=-3.9-i*0.62;
+    if(up){const h=0.2*(i+1);edged(box(half,h,0.62,0xbec3cd,mid-half/2-0.15,h/2,z));}
+    if(down)box(half,0.03,0.56,[0xa0a5af,0x8c919b,0x787d87,0x646973,0x50555f,0x3c414b,0x282d37,0x191c24][i],mid+half/2+0.15,0.012+i*0.001,z);}
+  edged(box(0.14,1,5.6,0x3c60aa,mid,0.5,-6.1));solid(mid-0.08,mid+0.08,-DEPTH,-3.3,2.5);
+  [[mid-r.w/4,up,'▲',n+1],[mid+r.w/4,down,'▼',n-1]].forEach(s=>{
+    label(2.6,0.8,312,96,s[0],3,0.05,0,(g,W,H)=>{g.fillStyle=s[1]?'#469650':'#783c3c';g.fillRect(0,0,W,H);g.strokeStyle='#1e1e28';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);
+      textFit(g,s[1]?s[2]+' '+tr('floor',s[3]):'✖',W/2,H/2+2,W-26,46,'#ffffff');});
+    if(!s[1]){edged(box(half,1.1,0.2,0x783c3c,s[0],0.55,-3.5));solid(s[0]-half/2-0.15,s[0]+half/2+0.15,-3.65,-3.35,3);}});
+}
+function sitter(r){   // пасхалка в классе 5-1: тот самый парень в очках
+  const m=humanoid({skin:0xfad7b4,shirt:0x466edc,pants:0x3c3c6e,legH:0.5,legR:0.11,torsoH:0.55,torsoR:0.24,headR:0.3,armR:0.07,armL:0.52,
+    brow:0,eyeColor:0xffffff,hair:0x5a371e});
+  const R=0.3;[-1,1].forEach(s=>add(new THREE.TorusGeometry(R*0.36,0.022,8,18),INK,s*R*0.37,R*0.12,R*1.15,m.head));
+  box(R*0.2,0.025,0.025,INK,0,R*0.16,R*1.15,m.head);
+  m.legs.forEach(l=>l.rotation.x=-Math.PI/2);m.arms.forEach(a=>a.rotation.x=0.18);
+  m.g.position.set(r.x0+4.12,-0.02,-5);m.g.rotation.y=-Math.PI/2;target.add(m.g);
+}
+function buildRoom(r){
+  if(r.type==='stairs'){mainStairs(r);return;}
+  const x0=r.x0,x1=r.x1;
+  const wc=r.type==='cls'?CLASS_WALLS[(+r.id.split('-')[1])%3]:r.type==='korean'?CLASS_WALLS[0]:r.type==='first'?CLASS_WALLS[2]:WALLS[r.type];
+  if(r.type==='office')floorPlane(x0,x1,-DEPTH,0,'office',floorDraw('#5f2837','#4b1e2a'));
+  else floorPlane(x0,x1,-DEPTH,0,'room',floorDraw('#966e50','#7d5a41'));
+  wall(x0-0.1,x0+0.1,-DEPTH,-0.2,wc);wall(x1-0.1,x1+0.1,-DEPTH,-0.2,wc);wall(x0,x1,-DEPTH-0.2,-DEPTH+0.2,wc);
+  const a=x0+1.9,b=x1-1.9,h=DOOR_W/2;   // две двери: передняя и задняя
+  wall(x0,a-h,-0.2,0.2,wc);wall(a+h,b-h,-0.2,0.2,wc);wall(b+h,x1,-0.2,0.2,wc);
+  [a,b].forEach(cx=>edged(box(DOOR_W,ROOM_H-2.62,0.36,0x785537,cx,2.62+(ROOM_H-2.62)/2,0)));
+  r.doors=[makeDoor(r,a,1),makeDoor(r,b,-1)];
+  // окна из класса в коридор, как в корейских школах
+  const mid=(a+b)/2,mw=Math.min(b-a-2.2,r.w>10?6:3.2);
+  if(r.type!=='office'){plane(mw,1,windowMat(false),mid,1.9,0.215,0);plane(mw,1,windowMat(false),mid,1.9,-0.215,Math.PI);}
+  // табличка с названием над передней дверью
+  label(1.9,0.42,384,86,a,3.08,0.24,0,(g,W,H)=>{g.fillStyle=r.type==='office'?'#e6be46':'#f5f5f0';g.fillRect(0,0,W,H);
+    g.strokeStyle='#1e1e28';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);textFit(g,roomName(r),W/2,H/2+2,W-30,42,'#1e1e28');});
+  furnish(r);
+  if(r.id==='5-1')sitter(r);
+  const lampMat=flat({color:0xfff6c8});
+  for(let lx=x0+r.w/4;lx<x1-1;lx+=r.w/2)box(1.8,0.06,0.5,lampMat,lx,ROOM_H-0.04,-4.5);
+}
+
+function stairs(f,west){   // лестница в конце коридора: половина у классов — вверх, половина у окон — вниз
+  const edge=west?0:f.len,dir=west?-1:1,x=k=>edge+dir*k;
+  const up=f.n<PLAN.length,down=f.n>1;
+  const hz=CORR/2,zu=CORR/4,zd=CORR*3/4,sd=hz-0.3;
+  for(let i=0;i<6;i++){
+    if(up){const h=0.22*(i+1);edged(box(0.42,h,sd,0xbec3cd,x(3.6+i*0.4),h/2,zu));}
+    if(down)box(0.34,0.03,sd,[0x8c919b,0x787d87,0x646973,0x50555f,0x3c414b,0x282d37][i],x(3.6+i*0.4),0.012+i*0.001,zd);
+  }
+  const mid=(x(3.4)+x(STAIR))/2,wid=STAIR-3.4;
+  edged(box(wid,1,0.12,0x3c60aa,mid,0.5,hz));solid(mid-wid/2,mid+wid/2,hz-0.06,hz+0.06,2.5);
+  [[zu,up,'▲',f.n+1],[zd,down,'▼',f.n-1]].forEach(s=>{
+    label(1.5,0.6,240,96,x(STAIR-0.05),2.7,s[0],west?Math.PI/2:-Math.PI/2,(g,W,H)=>{g.fillStyle=s[1]?'#469650':'#783c3c';g.fillRect(0,0,W,H);
+      g.strokeStyle='#1e1e28';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);textFit(g,s[1]?s[2]+' '+tr('floor',s[3]):'✖',W/2,H/2+2,W-26,44,'#ffffff');});
+    if(!s[1]){edged(box(0.2,1.1,sd,0x783c3c,x(3.5),0.55,s[0]));solid(x(3.5)-0.15,x(3.5)+0.15,s[0]-hz/2,s[0]+hz/2,3);}
+  });
+}
+
+function buildFloor(n){
+  const f={n,group:new THREE.Group(),colliders:[],doors:[],rooms:[],enemies:[],pickups:[],len:0};
+  building=f;target=f.group;
+  let x=0;
+  PLAN[n-1].forEach(p=>{const r={type:p.type,id:p.id,w:p.w,x0:x,x1:x+p.w,safe:p.type==='support',floor:n,doors:[],group:new THREE.Group()};x+=p.w;f.rooms.push(r);});
+  f.len=x;
+  const L=f.len,cw=WALLS.corr;
+  floorPlane(-STAIR,L+STAIR,0,CORR,'hall',tiles('#afbec8','#96a8b4','#7d8c98'));
+  wall(-STAIR-0.2,L+STAIR+0.2,CORR,CORR+0.3,cw);
+  wall(-STAIR-0.3,-STAIR,0,CORR,cw);wall(L+STAIR,L+STAIR+0.3,0,CORR,cw);
+  wall(-STAIR,-0.1,-0.2,0,cw);wall(L+0.1,L+STAIR,-0.2,0,cw);
+  const ceil=add(new THREE.PlaneGeometry(L+STAIR*2,DEPTH+CORR),col(0xf0e6d2),L/2,ROOM_H,(CORR-DEPTH)/2);ceil.rotation.x=Math.PI/2;
+  for(let wx=2.5;wx<L-1;wx+=4.5)plane(3,1.5,windowMat(true),wx,2,CORR-0.02,Math.PI);   // окна коридора на улицу
+  const lampMat=flat({color:0xfff6c8});
+  for(let lx=-3;lx<L+STAIR;lx+=6)box(1.4,0.06,0.5,lampMat,lx,ROOM_H-0.04,CORR/2);
+  if(n===1)for(let i=0;i<5;i++){cabinet(2+i*1.15,CORR-0.35,1.05,0.6,1.4,0x965f32);   // шкафчики для обуви у входа
+    for(let k=0;k<3;k++)for(let j=0;j<2;j++)box(0.42,0.28,0.04,0x69411e,2+i*1.15-0.24+j*0.48,0.35+k*0.42,CORR-0.67);}
+  stairs(f,true);stairs(f,false);
+  f.rooms.forEach(r=>{target=r.group;f.group.add(r.group);buildRoom(r);});
+  target=f.group;
+  // вещи и враги
+  f.rooms.forEach(r=>{const c=CONTENT[r.type];
+    c.i.concat(r.type==='cls'?(CLASS_ITEMS[r.id]||[]):[]).forEach(i=>{if(i[0]==='key'&&S.hasKey)return;
+      addPickup(f,i[0],r.x0+i[1],i[2],r.type==='canteen'&&i[0]==='pie');});
+    if(r.id!=='5-1')c.e.forEach(e=>spawnEnemy(f,e[0],r.x0+e[1],e[2],r));});   // в 5-1 зомби нет: там сидит парень в очках
+  [0.42,0.74].forEach((k,i)=>spawnEnemy(f,i===1&&n>2?'tall':'zombie',L*k+(n===1?6:0),CORR/2,null));
+  if(n>1)spawnEnemy(f,n===4?'fat':'zombie',L*0.2,CORR*0.65,null);
+  if(n===1){addPickup(f,'mop',18,CORR-0.9);addPickup(f,'pie',22,0.9);}
+  target=scene;building=null;
+  return f;
+}
+function goFloor(n){
+  if(F)scene.remove(F.group);
+  F=floors[n]||(floors[n]=buildFloor(n));
+  scene.add(F.group);colliders=F.colliders;enemies=F.enemies;pickups=F.pickups;
+  projectiles.splice(0).forEach(p=>scene.remove(p.mesh));particles.splice(0).forEach(p=>scene.remove(p.m));
+}
+function roomAt(x,z){if(z>=0)return null;for(const r of F.rooms)if(x>=r.x0&&x<r.x1)return r.type==='stairs'?null:r;return null;}   // null — коридор
+const passable=d=>d.amt>0.75;
+function sameSpace(ax,az,bx,bz){   // можно ли достать друг друга: одно помещение или оба у открытой двери (не сквозь стену)
+  if(roomAt(ax,az)===roomAt(bx,bz))return true;
+  for(const d of F.doors)if(passable(d)&&Math.hypot(ax-d.x,az)<2.4&&Math.hypot(bx-d.x,bz)<2.4)return true;
+  return false;
+}
+function insideSchool(x,z){return x>=-STAIR&&x<=F.len+STAIR&&z>=-DEPTH&&z<=CORR;}
+
+/* ====================== ДВИЖЕНИЕ ====================== */
+function pushOut(o,r,c){
+  const cx=Math.max(c.x0,Math.min(o.x,c.x1)),cz=Math.max(c.z0,Math.min(o.z,c.z1)),dx=o.x-cx,dz=o.z-cz,d2=dx*dx+dz*dz;
+  if(d2>=r*r)return;
+  if(d2>1e-8){const d=Math.sqrt(d2);o.x=cx+dx/d*r;o.z=cz+dz/d*r;}
+  else{const a=o.x-c.x0,b=c.x1-o.x,e=o.z-c.z0,f=c.z1-o.z,m=Math.min(a,b,e,f);
+    if(m===a)o.x=c.x0-r;else if(m===b)o.x=c.x1+r;else if(m===e)o.z=c.z0-r;else o.z=c.z1+r;}
+}
+function collide(o,r,feet,step){for(const c of colliders){if(c.off||c.top<=feet+step||c.x0>o.x+r+0.1||c.x1<o.x-r-0.1)continue;pushOut(o,r,c);}}
+function groundAt(x,z,r,feet,step){
+  let g=0;for(const c of colliders){if(c.off||c.top>feet+step||c.top<=g)continue;
+    if(x+r*0.7>c.x0&&x-r*0.7<c.x1&&z+r*0.7>c.z0&&z-r*0.7<c.z1)g=c.top;}return g;
+}
+/* Любое движение (ходьба, отбрасывание, толчки) идёт шажками по 8 см: рывком сквозь стену не проскочить.
+   Запасная защита: шаг за пределы школы или в соседнее помещение не через открытую дверь отменяется. */
+function moveBy(o,dx,dz,r,feet,step){
+  const n=Math.max(1,Math.ceil(Math.hypot(dx,dz)/0.08));
+  for(let i=0;i<n;i++){const px=o.x,pz=o.z;o.x+=dx/n;o.z+=dz/n;collide(o,r,feet,step);collide(o,r,feet,step);
+    if(!insideSchool(o.x,o.z)||!sameSpace(px,pz,o.x,o.z)){o.x=px;o.z=pz;return;}}
+}
+
+/* ====================== ДВЕРИ ====================== */
+function nearDoor(){
+  let best=null,bd=1.75;if(!F)return null;
+  for(const d of F.doors){const k=Math.hypot(P.x-d.x,P.z);if(k<bd){bd=k;best=d;}}
+  return best;
+}
+function inDoorway(d){const hit=o=>Math.abs(o.x-d.x)<DOOR_W/2+0.3&&Math.abs(o.z)<0.58;return hit(P)||enemies.some(e=>e.dead<=0&&hit(e));}
+function useDoor(){
+  const d=nearDoor();if(!d||S.state!=='play')return;
+  if(d.locked){
+    if(!S.hasKey){say('locked');SND.hit();return;}
+    d.room.doors.forEach(q=>q.locked=false);say('unlocked');
+  }
+  if(d.open&&inDoorway(d))return;   // в проёме кто-то стоит: не прищемить
+  d.open=!d.open;SND.door();
+}
+function updateDoors(dt){
+  for(const d of F.doors){const want=d.open?1:0;
+    if(d.amt!==want)d.amt=want>d.amt?Math.min(1,d.amt+dt*3.2):Math.max(0,d.amt-dt*3.2);
+    d.mesh.position.x=d.x+d.dir*d.amt*(DOOR_W-0.04);d.col.off=passable(d);}
+}
+
+/* ====================== ВРАГИ ====================== */
+const KINDS={
+  zombie:{hp:3,speed:[1.5,2.1],r:0.38,h:1.8,dmg:1,reach:0.45},
+  tall:{hp:5,speed:[1.3,1.7],r:0.38,h:2.35,dmg:1,reach:1.15},
+  fat:{hp:12,speed:[0.8,1.0],r:0.72,h:1.85,dmg:2,reach:0.4,kb:0.35,stunMax:1.2},
+  giant:{hp:28,speed:[0.8,0.95],r:0.9,h:3.0,dmg:2,reach:0.75,kb:0.15,stunMax:1.0},
+  imp:{hp:2,speed:[2.8,3.5],r:0.25,h:1.0,dmg:1,reach:0.3,hop:true},
+  boss:{hp:44,speed:[1.5,1.5],r:0.65,h:2.65,dmg:1,reach:0.6,kb:0.05,stunMax:0.5},
+  strict:{hp:20,speed:[1.6,1.6],r:0.45,h:2.4,dmg:1,reach:0.9,kb:0.2,stunMax:0.8}
+};
+const projectiles=[],particles=[];
+function spawnEnemy(f,kind,x,z,home){
+  const k=KINDS[kind],m=makeModel(kind);
+  const e={kind,k,m,x,y:0,z,hx:x,hz:z,home,floor:f,hp:k.hp,max:k.hp,speed:k.speed[0]+Math.random()*(k.speed[1]-k.speed[0]),cd:0.6,stun:0,
+    flash:0,anim:Math.random()*6,vx:0,vy:0,vz:0,flying:false,age:0,dead:0,carries:null,hopT:1+Math.random(),awake:false,doorT:0,
+    state:'walk',t:0,throwCd:2.2,chargeCd:5,phase2:false,dirx:0,dirz:0};
+  if(kind==='giant'){const imp=makeModel('imp');imp.g.position.set(0.38,1.6,-0.78);imp.g.rotation.y=-0.3;m.g.add(imp.g);e.carries=imp.g;}
+  m.g.position.set(x,0,z);m.g.rotation.y=home?0:-Math.PI/2;f.group.add(m.g);f.enemies.push(e);return e;
+}
+function removeEnemy(e){e.floor.group.remove(e.m.g);e.m.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});
+  const i=e.floor.enemies.indexOf(e);if(i>=0)e.floor.enemies.splice(i,1);}
+function wake(e){
+  if(e.awake)return;e.awake=true;e.age=0;
+  if(e.kind==='giant'){say('giant');SND.roar();}
+  if(e.kind==='boss'){say('bossStart','',3);SND.roar();}
+  if(e.kind==='strict'){say('strictStart');SND.roar();}
+}
+/* куда идти: прямо к герою или к двери (своей, чтобы выйти, или той комнаты, где герой) */
+function chaseTarget(e,dt){
+  const a=roomAt(e.x,e.z),b=roomAt(P.x,P.z);
+  if(a===b)return [P.x,P.z];
+  const through=a||b,goingIn=!a;
+  let d=through.doors[0];const ref=goingIn?e.x:P.x;
+  if(Math.abs(through.doors[1].x-ref)<Math.abs(d.x-ref))d=through.doors[1];
+  if(!passable(d)&&!d.locked&&Math.hypot(e.x-d.x,e.z)<1.7){e.doorT+=dt;if(e.doorT>1.2){d.open=true;e.doorT=0;SND.door();}}
+  const lined=Math.abs(e.x-d.x)<0.35&&Math.abs(e.z)<1.8;
+  if(!lined)return [d.x,goingIn?1.1:-1.1];
+  return [d.x,goingIn?-1.5:1.5];
+}
+function updateEnemy(e,dt){
+  if(e.dead>0){e.dead+=dt;e.m.g.rotation.x=-Math.min(1,e.dead/0.35)*Math.PI/2;
+    if(e.dead>0.8)e.m.g.position.y-=dt*1.2;if(e.dead>1.5)removeEnemy(e);return;}
+  const dx=P.x-e.x,dz=P.z-e.z,dist=Math.hypot(dx,dz);
+  const mine=roomAt(e.x,e.z),his=roomAt(P.x,P.z);
+  if(!e.awake){
+    const near=e.home?his===e.home:(his===null&&dist<11);
+    if(near||e.hp<e.max)wake(e);else return;
+  }
+  e.cd=Math.max(0,e.cd-dt);e.age+=dt;
+  if(e.flash>0){e.flash-=dt;if(e.flash<=0)e.m.mats.forEach(m=>m.emissive.setHex(0));}
+  // в класс поддержки враги не заходят, а учителя и директор не выходят из своих кабинетов
+  const teacher=e.kind==='boss'||e.kind==='strict';
+  const idle=!!(his&&his.safe)||(teacher&&his!==e.home);
+  let moving=0;
+  if(e.flying){
+    e.vy-=14*dt;e.y+=e.vy*dt;moveBy(e,e.vx*dt,e.vz*dt,e.k.r,e.y,0.5);
+    const g=groundAt(e.x,e.z,e.k.r,e.y,0.4);if(e.y<=g&&e.vy<0){e.y=g;e.flying=false;}
+  }else{
+    if(e.stun>0)e.stun-=dt;
+    else if(idle){/* стоит и ждёт */}
+    else if(teacher)moving=updateTeacher(e,dt,dx,dz,dist);
+    else if(dist<30){
+      const t=chaseTarget(e,dt),tx=t[0]-e.x,tz=t[1]-e.z,l=Math.hypot(tx,tz)||1;
+      const stop=e.k.r+0.35+e.k.reach*0.6;
+      if(!(dist<stop&&mine===his)){moveBy(e,tx/l*e.speed*dt,tz/l*e.speed*dt,e.k.r,e.y,1.0);moving=e.speed;}
+      e.m.g.rotation.y=Math.atan2(tx,tz);
+    }
+    for(const o of enemies){if(o===e||o.dead>0||Math.abs(o.x-e.x)>2)continue;const ox=e.x-o.x,oz=e.z-o.z,d=Math.hypot(ox,oz),m=(e.k.r+o.k.r)*0.85;
+      if(d<m&&d>1e-4){const push=(m-d)*(o.k.r/(e.k.r+o.k.r));moveBy(e,ox/d*push,oz/d*push,e.k.r,e.y,1.0);}}
+    const g=groundAt(e.x,e.z,e.k.r,e.y,1.0);
+    if(e.y>g+0.02||e.vy>0){e.vy-=14*dt;e.y+=e.vy*dt;if(e.y<g){e.y=g;e.vy=0;}}
+    else{e.y+=(g-e.y)*Math.min(1,dt*12);e.vy=0;
+      if(e.k.hop&&e.stun<=0&&!idle){e.hopT-=dt;if(e.hopT<=0){e.vy=4.2;e.y+=0.03;e.hopT=0.8+Math.random();}}}
+    e.anim+=moving*dt*3.2;
+  }
+  if(e.carries&&e.stun<=0&&dist<10&&mine===his&&(e.hp<=e.max*0.6||e.age>7))throwImp(e);
+  const reach=e.k.r+0.35+e.k.reach;
+  if(e.cd<=0&&e.stun<=0&&!idle&&dist<reach&&P.y<e.y+e.k.h&&P.y+1.6>e.y&&sameSpace(e.x,e.z,P.x,P.z)){
+    e.cd=1.1;hurtPlayer(e.kind==='boss'&&e.state==='charge'?2:e.k.dmg,e.x,e.z);}
+  const s=Math.sin(e.anim),m=e.m;
+  m.legs[0].rotation.x=s*0.6;m.legs[1].rotation.x=-s*0.6;
+  const bite=e.cd>0.85;
+  m.arms[0].rotation.x=(bite?-0.5:0)+s*0.14;m.arms[1].rotation.x=(bite?-0.5:0)-s*0.14;
+  if(e.state==='throw')m.arms[1].rotation.x=-1.8;
+  m.head.rotation.z=e.stun>0?Math.sin(e.age*14)*0.3:Math.sin(e.anim*0.5)*0.08;
+  m.g.position.set(e.x+(e.state==='windup'?(Math.random()-0.5)*0.12:0),e.y,e.z);
+}
+function updateTeacher(b,dt,dx,dz,dist){   // директор: двойки, таран, подмога. Учитель английского: кидает «F»
+  b.t+=dt;const boss=b.kind==='boss';
+  if(boss&&!b.phase2&&b.hp<=b.max/2){b.phase2=true;b.speed=2.1;say('bossHelp');SND.roar();
+    [[1.8,-2.4],[b.home.w-1.8,-2.4],[b.home.w/2,-7.8]].forEach(p=>{spawnEnemy(b.floor,'zombie',b.home.x0+p[0],p[1],b.home).awake=true;});}
+  const face=()=>b.m.g.rotation.y=Math.atan2(dx,dz);
+  const set=s=>{b.state=s;b.t=0;};
+  const walk=()=>{if(dist>b.k.r+0.7){moveBy(b,dx/(dist||1)*b.speed*dt,dz/(dist||1)*b.speed*dt,b.k.r,b.y,1.1);return b.speed;}return 0;};
+  if(b.state==='walk'){face();b.throwCd-=dt;b.chargeCd-=dt;
+    if(b.throwCd<=0)set('throw');else if(boss&&b.chargeCd<=0){set('windup');SND.roar();}
+    return walk();}
+  if(b.state==='throw'){face();if(b.t>0.55){
+      (b.phase2?[-0.28,0,0.28]:[0]).forEach(a=>{const ang=Math.atan2(dx,dz)+a;
+        throwCard(b.x+Math.sin(ang)*0.8,b.y+1.8,b.z+Math.cos(ang)*0.8,ang,(P.y+1.2-(b.y+1.8))/Math.max(0.35,dist/9),boss?0:1);});
+      b.throwCd=b.phase2?1.9:2.6;set('walk');}return 0;}
+  if(b.state==='windup'){face();if(b.t>0.8){const l=dist||1;b.dirx=dx/l;b.dirz=dz/l;set('charge');b.cd=0;}return 0;}
+  if(b.state==='charge'){moveBy(b,b.dirx*8*dt,b.dirz*8*dt,b.k.r,b.y,1.1);
+    if(b.t>0.9){set('tired');b.chargeCd=b.phase2?4:6;}return 8;}
+  if(b.state==='tired'&&b.t>(b.phase2?1.0:1.5))set('walk');
+  return 0;
+}
+function throwImp(e){
+  e.m.g.remove(e.carries);e.carries=null;
+  const imp=spawnEnemy(e.floor,'imp',e.x,e.z,e.home),dx=P.x-e.x,dz=P.z-e.z;
+  imp.awake=true;imp.y=2.2;imp.vy=3.5;const flight=0.85;imp.vx=dx/flight;imp.vz=dz/flight;imp.flying=true;imp.cd=0.7;
+  imp.m.g.position.set(imp.x,imp.y,imp.z);say('impThrow');SND.roar();
+}
+function damage(e,dmg,fromX,fromZ,knock,stun){
+  if(e.dead>0)return;
+  wake(e);e.hp-=dmg;e.flash=0.12;e.m.mats.forEach(m=>m.emissive.setHex(0x888888));
+  const dx=e.x-fromX,dz=e.z-fromZ,l=Math.hypot(dx,dz)||1,kb=(knock||0)*(e.k.kb===undefined?1:e.k.kb);
+  moveBy(e,dx/l*kb,dz/l*kb,e.k.r,e.y,1.0);
+  if(stun)e.stun=Math.max(e.stun,Math.min(stun,e.k.stunMax===undefined?stun:e.k.stunMax));
+  burst(e.x,e.y+e.k.h*0.6,e.z,0x78c878,6);SND.hit();
+  if(e.hp<=0){e.dead=0.001;S.kills++;SND.die();
+    if(e.carries){e.m.g.remove(e.carries);e.carries=null;const i=spawnEnemy(e.floor,'imp',e.x,e.z,e.home);
+      i.awake=true;moveBy(i,0.6,0,i.k.r,1.6,0.5);i.y=1.5;i.flying=true;i.vy=3;}
+    if(e.kind==='boss'){S.won=true;S.winT=1.4;}
+    else if(Math.random()<0.22)addPickup(e.floor,'pie',e.x,e.z);}
+}
+
+/* ====================== ГЕРОЙ И ОРУЖИЕ ====================== */
+const WEAPONS={
+  fists:{type:'melee',dmg:1,range:1.5,cd:0.42,kb:0.35},
+  ruler:{type:'melee',dmg:1.6,range:1.9,cd:0.3,kb:0.35},
+  mop:{type:'melee',dmg:2,range:2.7,cd:0.55,kb:0.9},
+  chair:{type:'melee',dmg:3.5,range:1.9,cd:0.75,kb:0.8,stun:0.7},
+  watergun:{type:'shot',dmg:1.2,cd:0.24,ammo:40,speed:19,kb:0.2},
+  piebomb:{type:'bomb',dmg:6,cd:0.8,ammo:4,speed:11,area:3.2,kb:1.0}
+};
+const ORDER=Object.keys(WEAPONS);
+const P={x:0,y:0,z:2,vy:0,yaw:0,pitch:0,hp:5,max:5,cd:0,swing:0,inv:0,hurt:0,weapon:'fists',ammo:{},have:{fists:true},bob:0};
+const view=new THREE.Group();camera.add(view);
+function weaponModel(key){
+  const g=new THREE.Group(),L=0.008;
+  const sleeve=tube(0.065,0.075,0.26,0x466edc,0.02,-0.035,0.17,g,L);sleeve.rotation.x=Math.PI/2;   // рукав и ладонь — всегда первые два
+  ball(0.075,0xfad7b4,0,0,0,g,L);
+  const along=m=>{m.rotation.x=Math.PI/2;return m;};
+  if(key==='fists')ball(0.04,0xfad7b4,-0.05,0.035,-0.04,g,L);
+  if(key==='ruler'){edged(box(0.08,0.018,0.64,0xf0dc64,0,0.04,-0.34,g));for(let i=0;i<7;i++)box(0.035,0.004,0.008,INK,-0.02,0.052,-0.12-i*0.08,g);}
+  if(key==='mop'){along(tube(0.024,0.024,0.95,0x965f32,0,0.02,-0.44,g,L));
+    for(let i=-3;i<=3;i++){const s=tube(0.022,0.028,0.24,0xcdcdd7,i*0.04,-0.06,-0.93,g,L);s.rotation.z=i*0.14;}
+    along(tube(0.07,0.07,0.1,0x69411e,0,0.025,-0.91,g,L));}
+  if(key==='chair'){edged(box(0.34,0.05,0.32,0x965f32,0,0.1,-0.3,g));edged(box(0.34,0.2,0.04,0x965f32,0,0.36,-0.45,g));
+    [-0.13,0.13].forEach(x=>tube(0.018,0.018,0.28,0x69411e,x,0.24,-0.45,g,L));
+    [[-0.14,-0.17],[0.14,-0.17],[-0.14,-0.43],[0.14,-0.43]].forEach(p=>tube(0.02,0.016,0.28,0x69411e,p[0],-0.05,p[1],g,L));}
+  if(key==='watergun'){along(tube(0.065,0.065,0.36,0x6eaaff,0,0.07,-0.13,g,L));along(tube(0.03,0.04,0.18,0xff8c28,0,0.075,-0.39,g,L));
+    ball(0.1,0xebf5ff,0,0.19,-0.05,g,L);ball(0.025,0xf0dc64,0,0.19,-0.16,g,L);}
+  if(key==='piebomb'){tube(0.15,0.11,0.1,0xe1a046,0,0.1,-0.1,g,L);const cr=ball(0.12,0xffe1a0,0,0.14,-0.1,g,L);cr.scale.y=0.55;
+    ball(0.035,0xd22d37,0.05,0.21,-0.07,g,L);tube(0.012,0.012,0.13,INK,-0.02,0.27,-0.12,g);ball(0.032,0xff8c28,-0.02,0.35,-0.12,g);}
+  return g;
+}
+let viewKey=null;
+function setWeapon(key){P.weapon=key;if(viewKey!==key){view.clear();view.add(weaponModel(key));viewKey=key;}}
+const usable=k=>!!P.have[k]&&(WEAPONS[k].type==='melee'||P.ammo[k]>0);
+function nextWeapon(){
+  let i=ORDER.indexOf(P.weapon);
+  for(let n=0;n<ORDER.length;n++){i=(i+1)%ORDER.length;if(usable(ORDER[i])){setWeapon(ORDER[i]);return;}}
+}
+function forward(){return [-Math.sin(P.yaw),-Math.cos(P.yaw)];}
+function attack(){
+  if(P.cd>0||S.state!=='play')return;
+  const key=P.weapon,w=WEAPONS[key];P.cd=w.cd;P.swing=0.22;
+  const f=forward();
+  if(w.type==='melee'){SND.swing();
+    for(const e of [...enemies]){if(e.dead>0)continue;const dx=e.x-P.x,dz=e.z-P.z,d=Math.hypot(dx,dz)||1e-3;
+      if(d-e.k.r>w.range||P.y>e.y+e.k.h||P.y+1.8<e.y)continue;
+      if((dx*f[0]+dz*f[1])/d<0.55&&d>e.k.r+0.3)continue;
+      if(!sameSpace(e.x,e.z,P.x,P.z))continue;
+      damage(e,w.dmg,P.x,P.z,w.kb,w.stun);}
+    return;
+  }
+  if(!(P.ammo[key]>0)){say('empty');nextWeapon();return;}
+  P.ammo[key]--;SND.shot();
+  const cp=Math.cos(P.pitch),dir=new THREE.Vector3(f[0]*cp,Math.sin(P.pitch),f[1]*cp);
+  const bomb=w.type==='bomb';
+  const mesh=bomb?ball(0.17,0xe1a046,0,0,0,scene,0.02):ball(0.085,flat({color:0x7ee4ff}),0,0,0,scene,0.015);
+  if(bomb)mesh.scale.y=0.65;else mesh.scale.z=1.7;
+  mesh.position.set(P.x+f[0]*0.35,P.y+1.38,P.z+f[1]*0.35);mesh.rotation.y=P.yaw;
+  projectiles.push({mesh,vx:dir.x*w.speed,vy:dir.y*w.speed+(bomb?3.2:0),vz:dir.z*w.speed,w,bomb,life:2.5,enemy:false});
+  if(P.ammo[key]<=0)setTimeout(()=>{if(P.weapon===key&&!(P.ammo[key]>0))nextWeapon();},250);
+}
+const cardMats=['2','F'].map(ch=>flat({map:canvasTex(64,80,(g)=>{g.fillStyle='#fafaf5';g.fillRect(0,0,64,80);g.strokeStyle='#1e1e28';g.lineWidth=6;
+  g.strokeRect(3,3,58,74);g.fillStyle='#d72332';g.font='bold 56px Verdana';g.textAlign='center';g.textBaseline='middle';g.fillText(ch,32,43);})}));
+function throwCard(x,y,z,ang,vy,kind){
+  const mesh=box(0.46,0.6,0.05,cardMats[kind],x,y,z,scene);
+  projectiles.push({mesh,vx:Math.sin(ang)*9,vy,vz:Math.cos(ang)*9,life:2.5,enemy:true,bomb:false});SND.swing();
+}
+function explode(x,y,z,w){
+  SND.boom();burst(x,y+0.3,z,0xffb43c,26);burst(x,y+0.3,z,0xffe1a0,18);S.shake=0.35;
+  for(const e of [...enemies]){const d=Math.hypot(e.x-x,e.z-z)-e.k.r;if(e.dead<=0&&d<w.area&&Math.abs(e.y-y)<3&&sameSpace(e.x,e.z,x,z))damage(e,w.dmg,x,z,w.kb,0.8);}
+}
+function updateProjectiles(dt){
+  for(let i=projectiles.length-1;i>=0;i--){
+    const p=projectiles[i],m=p.mesh.position;p.life-=dt;
+    let done=p.life<=0;
+    for(let n=0;n<6&&!done;n++){
+      const st=dt/6,ox=m.x,oz=m.z;if(p.bomb)p.vy-=12*st;m.x+=p.vx*st;m.y+=p.vy*st;m.z+=p.vz*st;
+      if(p.enemy){if(Math.hypot(m.x-P.x,m.z-P.z)<0.55&&m.y>P.y&&m.y<P.y+1.9){hurtPlayer(1,m.x-p.vx,m.z-p.vz);done=true;}}
+      else for(const e of enemies){if(e.dead>0)continue;
+        if(Math.hypot(m.x-e.x,m.z-e.z)<e.k.r+0.18&&m.y>e.y-0.1&&m.y<e.y+e.k.h+0.15){
+          if(!p.bomb)damage(e,p.w.dmg,m.x-p.vx,m.z-p.vz,p.w.kb);done=true;break;}}
+      if(!done){const hitWall=colliders.some(c=>!c.off&&m.x>c.x0&&m.x<c.x1&&m.z>c.z0&&m.z<c.z1&&m.y<c.top);
+        if(hitWall||m.y<0.05||m.y>ROOM_H){done=true;m.x=ox;m.z=oz;}}   // взрыв по эту сторону стены
+    }
+    if(p.enemy)p.mesh.rotation.y+=dt*10;else if(p.bomb)p.mesh.rotation.x+=dt*8;
+    if(done){if(p.bomb)explode(m.x,Math.max(0,m.y),m.z,p.w);else burst(m.x,m.y,m.z,p.enemy?0xffffff:0x78d8ff,5);
+      scene.remove(p.mesh);projectiles.splice(i,1);}
+  }
+}
+function burst(x,y,z,color,n){
+  for(let i=0;i<n;i++){const m=add(new THREE.SphereGeometry(0.065,8,6),flat({color}),x,y,z,scene);
+    particles.push({m,vx:(Math.random()-0.5)*5,vy:Math.random()*4,vz:(Math.random()-0.5)*5,life:0.35+Math.random()*0.35});}
+}
+function updateParticles(dt){
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.vy-=11*dt;
+    p.m.position.x+=p.vx*dt;p.m.position.y=Math.max(0.05,p.m.position.y+p.vy*dt);p.m.position.z+=p.vz*dt;
+    if(p.life<=0){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();particles.splice(i,1);}}
+}
+
+/* ----- вещи на полу и на партах ----- */
+function addPickup(f,kind,x,z,respawn){
+  const g=new THREE.Group();
+  if(kind==='pie'){tube(0.2,0.15,0.1,0xe1a046,0,0,0,g,0.015);const c=ball(0.15,0xffe1a0,0,0.05,0,g,0.012);c.scale.y=0.55;}
+  else if(kind==='key'){add(new THREE.TorusGeometry(0.15,0.045,8,18),0xfadc3c,-0.18,0,0,g);box(0.36,0.07,0.07,0xfadc3c,0.12,0,0,g);
+    box(0.07,0.14,0.07,0xfadc3c,0.2,-0.09,0,g);box(0.07,0.1,0.07,0xfadc3c,0.29,-0.07,0,g);}
+  else{const w=weaponModel(kind);w.remove(w.children[0]);w.remove(w.children[0]);w.scale.setScalar(1.15);g.add(w);}
+  const saved=colliders;colliders=f.colliders;
+  const base=groundAt(x,z,0.15,1.0,0);colliders=saved;
+  g.position.set(x,base+0.45,z);f.group.add(g);
+  f.pickups.push({kind,g,x,z,y:base+0.45,t:Math.random()*6,respawn:!!respawn,wait:0});
+}
+function updatePickups(dt){
+  for(let i=pickups.length-1;i>=0;i--){const it=pickups[i];it.t+=dt;it.g.rotation.y+=dt*1.8;it.g.position.y=it.y+Math.sin(it.t*3)*0.08;
+    if(it.wait>0){it.wait-=dt;if(it.wait<=0)it.g.visible=true;continue;}
+    if(Math.hypot(it.x-P.x,it.z-P.z)>1.0||Math.abs(it.y-P.y-0.45)>1.4||!sameSpace(it.x,it.z,P.x,P.z))continue;
+    if(it.kind==='pie'){if(P.hp>=P.max)continue;P.hp++;say('pie');}
+    else if(it.kind==='key'){S.hasKey=true;say('gotKey','',3.5);}
+    else{const w=WEAPONS[it.kind],fresh=!P.have[it.kind];P.have[it.kind]=true;
+      if(w.ammo)P.ammo[it.kind]=(P.ammo[it.kind]||0)+w.ammo;
+      if(fresh)setWeapon(it.kind);say('got',tr(it.kind));}
+    SND.pick();
+    if(it.respawn){it.wait=25;it.g.visible=false;}else{F.group.remove(it.g);pickups.splice(i,1);}}
+}
+
+/* ====================== ХОД ИГРЫ ====================== */
+const S={state:'menu',hasKey:false,won:false,winT:0,msgT:0,shake:0,fade:0,kills:0,time:0,mapT:0,lastRoom:null};
+function say(key,extra,time){$('msg').textContent=tr(key)+(extra||'');S.msgT=time||2.2;}
+function destroyFloors(){
+  if(F)scene.remove(F.group);F=null;
+  floors.forEach(f=>{if(f)f.group.traverse(o=>{if(o.geometry)o.geometry.dispose();});});floors.length=0;signs.length=0;
+  colliders=[];enemies=[];pickups=[];
+  projectiles.splice(0).forEach(p=>scene.remove(p.mesh));particles.splice(0).forEach(p=>scene.remove(p.m));
+}
+function place(x,z,yaw){Object.assign(P,{x,z,y:0,vy:0,yaw,pitch:0,cd:0,swing:0});}
+function startGame(){
+  Object.assign(S,{state:'play',hasKey:false,won:false,winT:0,kills:0,time:0,fade:1,lastRoom:null});
+  destroyFloors();goFloor(1);
+  P.have={fists:true};P.ammo={};P.hp=P.max;P.inv=1;P.hurt=0;setWeapon('fists');
+  place(-1.8,CORR/2,-Math.PI/2);$('fade').textContent=tr('floor',1);show(null);say('goalKey','',4);lock();
+}
+function retry(){   // очнуться в классе поддержки; враги снова целые и стоят на местах
+  floors.forEach(f=>{if(f)f.enemies.forEach(e=>{if(e.dead>0)return;
+    Object.assign(e,{x:e.hx,z:e.hz,y:0,hp:e.max,awake:false,phase2:false,state:'walk',stun:0,vy:0,flying:false});
+    if(e.kind==='boss')e.speed=e.k.speed[0];e.m.g.position.set(e.x,0,e.z);});});
+  goFloor(1);const r=F.rooms[0];
+  place(r.x0+r.w/2,-3.4,Math.PI);P.hp=P.max;P.inv=2;P.hurt=0;S.state='play';S.fade=1;$('fade').textContent=tr('floor',1);show(null);lock();
+}
+function mainStair(){return F.rooms.find(r=>r.type==='stairs');}
+function changeFloor(n,side){   // side: 'w' — западная лестница, 'e' — восточная, 'm' — главная
+  goFloor(n);
+  const s=mainStair();
+  place(side==='w'?-1.8:side==='e'?F.len+1.8:(s.x0+s.x1)/2,CORR/2,side==='e'?Math.PI/2:-Math.PI/2);
+  S.fade=1;S.lastRoom=null;$('fade').textContent=tr('floor',n);SND.step();
+}
+function checkStairs(){
+  const west=P.x<-3.5,east=P.x>F.len+3.5,s=mainStair();
+  const main=P.z<-4&&P.x>s.x0&&P.x<s.x1;
+  if(!west&&!east&&!main)return;
+  const n=F.n+((main?P.x<(s.x0+s.x1)/2:P.z<CORR/2)?1:-1);
+  if(n>=1&&n<=PLAN.length)changeFloor(n,main?'m':west?'w':'e');
+}
+function hurtPlayer(dmg,fx,fz){
+  if(P.inv>0||S.state!=='play'||S.won)return;
+  P.hp-=dmg;P.inv=0.9;P.hurt=0.5;S.shake=0.25;SND.hurt();
+  const dx=P.x-fx,dz=P.z-fz,l=Math.hypot(dx,dz)||1;moveBy(P,dx/l*0.6,dz/l*0.6,0.35,P.y,0.35);
+  if(P.hp<=0){P.hp=0;S.state='dead';show('dead');unlock();}
+}
+
+/* ====================== УПРАВЛЕНИЕ ====================== */
+const keys={};const stick={x:0,y:0};let dragLook=false,attackHeld=false;
+function lock(){if(isTouch)return;try{const p=canvas.requestPointerLock();if(p&&p.catch)p.catch(()=>{dragLook=true;});}catch(e){dragLook=true;}}
+function unlock(){attackHeld=false;try{if(document.pointerLockElement)document.exitPointerLock();}catch(e){}}
+document.addEventListener('pointerlockerror',()=>{dragLook=true;});
+document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement===canvas)dragLook=false;
+  else if(S.state==='play'&&!dragLook&&!isTouch)pause();});
+function look(dx,dy,k){P.yaw-=dx*k;P.pitch=Math.max(-1.35,Math.min(1.35,P.pitch-dy*k));}
+document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&S.state==='play')look(e.movementX,e.movementY,0.0024);});
+let drag=null;
+canvas.addEventListener('mousedown',e=>{if(S.state!=='play'||e.button!==0)return;
+  if(document.pointerLockElement===canvas){attackHeld=true;attack();}
+  else{drag={x:e.clientX,y:e.clientY,moved:0};if(!dragLook)lock();}});
+addEventListener('mousemove',e=>{if(!drag||document.pointerLockElement===canvas)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+  look(dx,dy,0.005);drag.moved+=Math.abs(dx)+Math.abs(dy);drag.x=e.clientX;drag.y=e.clientY;});
+addEventListener('mouseup',()=>{attackHeld=false;if(drag&&drag.moved<6&&(dragLook||isTouch))attack();drag=null;});
+addEventListener('keydown',e=>{
+  const c=e.code;keys[c]=true;
+  if(c==='Space'||c.startsWith('Arrow'))e.preventDefault();
+  if(c==='Escape'||c==='KeyP'){if(S.state==='play')pause();else if(S.state==='pause')resume();}
+  if(S.state!=='play')return;
+  if(c==='KeyE'&&!e.repeat)useDoor();
+  if(c==='KeyQ')nextWeapon();
+  if(c.startsWith('Digit')){const k=ORDER[+c.slice(5)-1];if(k&&usable(k))setWeapon(k);}
+});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;attackHeld=false;});
+if(isTouch){
+  const st=$('stick'),knob=$('knob');let id=null,cx=0,cy=0;
+  const mv=t=>{let dx=t.clientX-cx,dy=t.clientY-cy;const l=Math.hypot(dx,dy),m=46;if(l>m){dx*=m/l;dy*=m/l;}
+    knob.style.transform=`translate(${dx}px,${dy}px)`;stick.x=dx/m;stick.y=dy/m;};
+  st.addEventListener('touchstart',e=>{const t=e.changedTouches[0];id=t.identifier;const r=st.getBoundingClientRect();cx=r.left+r.width/2;cy=r.top+r.height/2;mv(t);e.preventDefault();},{passive:false});
+  st.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===id)mv(t);e.preventDefault();},{passive:false});
+  const end=e=>{for(const t of e.changedTouches)if(t.identifier===id){id=null;stick.x=stick.y=0;knob.style.transform='';}};
+  st.addEventListener('touchend',end);st.addEventListener('touchcancel',end);
+  let lid=null,lx=0,ly=0;
+  canvas.addEventListener('touchstart',e=>{for(const t of e.changedTouches)if(lid===null){lid=t.identifier;lx=t.clientX;ly=t.clientY;}e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===lid){if(S.state==='play')look(t.clientX-lx,t.clientY-ly,0.0065);lx=t.clientX;ly=t.clientY;}e.preventDefault();},{passive:false});
+  const lend=e=>{for(const t of e.changedTouches)if(t.identifier===lid)lid=null;};
+  canvas.addEventListener('touchend',lend);canvas.addEventListener('touchcancel',lend);
+  const hold=(el,on,off)=>{el.addEventListener('touchstart',e=>{e.preventDefault();on();},{passive:false});
+    ['touchend','touchcancel'].forEach(n=>el.addEventListener(n,e=>{e.preventDefault();if(off)off();},{passive:false}));};
+  hold($('tHit'),()=>{attackHeld=true;attack();},()=>{attackHeld=false;});
+  hold($('tJump'),()=>{keys.Space=true;},()=>{keys.Space=false;});
+  hold($('tSwap'),()=>nextWeapon());
+  hold($('tDoor'),()=>useDoor());
+  hold($('tPause'),()=>pause());
+}
+function show(id){
+  ['menu','pause','dead','win'].forEach(s=>$(s).classList.toggle('hide',s!==id));
+  $('hud').classList.toggle('hide',S.state==='menu');
+  $('touch').classList.toggle('hide',!(isTouch&&S.state==='play'));
+}
+function pause(){if(S.state!=='play')return;S.state='pause';show('pause');unlock();}
+function resume(){if(S.state!=='pause')return;S.state='play';show(null);lock();}
+function toMenu(){S.state='menu';S.fade=0;destroyFloors();goFloor(1);unlock();show('menu');}
+function audioOn(){if(AC){if(AC.state==='suspended')AC.resume();return;}
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+$('bPlay').onclick=()=>{audioOn();startGame();};
+$('bResume').onclick=()=>{audioOn();resume();};
+$('bRetry').onclick=()=>retry();
+$('bAgain').onclick=()=>startGame();
+$('bQuit').onclick=toMenu;$('bQuit2').onclick=toMenu;
+$('bLang').onclick=()=>{lang=LANGS[(LANGS.indexOf(lang)+1)%LANGS.length];try{localStorage.setItem('zs2_lang',lang);}catch(e){}applyLang();};
+
+/* ====================== КАДР ====================== */
+function updatePlayer(dt){
+  let fwd=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-stick.y;
+  let side=(keys.KeyD?1:0)-(keys.KeyA?1:0)+stick.x;
+  if(keys.ArrowLeft)P.yaw+=2.6*dt;if(keys.ArrowRight)P.yaw-=2.6*dt;
+  const l=Math.hypot(fwd,side);if(l>1){fwd/=l;side/=l;}
+  const sp=(keys.ShiftLeft||keys.ShiftRight||(isTouch&&l>0.98))?6.8:4.4;
+  const f=forward(),r=[Math.cos(P.yaw),-Math.sin(P.yaw)];
+  moveBy(P,(f[0]*fwd+r[0]*side)*sp*dt,(f[1]*fwd+r[1]*side)*sp*dt,0.35,P.y,0.35);
+  for(const e of enemies){if(e.dead>0||e.flying||Math.abs(e.x-P.x)>2||P.y>e.y+e.k.h*0.8)continue;const dx=P.x-e.x,dz=P.z-e.z,d=Math.hypot(dx,dz),m=e.k.r+0.28;
+    if(d<m&&d>1e-4)moveBy(P,dx/d*(m-d)*0.7,dz/d*(m-d)*0.7,0.35,P.y,0.35);}
+  const g=groundAt(P.x,P.z,0.35,P.y,0.35);
+  if(keys.Space&&P.y<=g+0.02)P.vy=6.4;
+  P.vy-=17*dt;P.y+=P.vy*dt;if(P.y<=g){P.y=g;P.vy=0;}
+  P.cd=Math.max(0,P.cd-dt);P.inv=Math.max(0,P.inv-dt);P.swing=Math.max(0,P.swing-dt);
+  if((attackHeld||keys.KeyJ)&&P.cd<=0)attack();
+  if(l>0.05&&P.y<=g+0.02)P.bob+=dt*sp*2;
+}
+function updateCamera(){
+  const sh=S.shake*0.18;
+  camera.position.set(P.x+(Math.random()-0.5)*sh,P.y+1.58+Math.sin(P.bob)*0.035+(Math.random()-0.5)*sh,P.z);
+  camera.rotation.set(P.pitch,P.yaw,0);
+  const sw=Math.sin(P.swing/0.22*Math.PI),portrait=camera.aspect<1;
+  view.position.set((portrait?0.1:0.2)-sw*0.07,-0.17+Math.sin(P.bob)*0.006+sw*0.02,-0.33-sw*0.05);
+  view.rotation.set(-sw*1.0,sw*0.45,0);view.scale.setScalar(0.5);
+}
+function bossHere(){const r=roomAt(P.x,P.z);
+  return enemies.find(e=>(e.kind==='boss'||e.kind==='strict')&&e.dead<=0&&e.awake&&r===e.home)||null;}
+const MAP_COLORS={stairs:'#96a8b4',support:'#78c878',korean:'#f0b45a',first:'#f082aa',office:'#d23c46',canteen:'#e1a046',cls:'#e1c88c',hall:'#aa82d2',
+  teachers:'#64b4dc',english:'#e6a0be',strict:'#968ca0',pe:'#dc8c50',science:'#78d2c3'};
+const MAP_MARK={stairs:'▲▼',support:'♥',korean:'한',first:'1',office:'★',canteen:'食',hall:'♪',teachers:'✎',english:'ABC',strict:'A!',pe:'체',science:'H₂O'};
+function drawMap(){
+  const c=$('map'),g=c.getContext('2d'),W=c.width,H=c.height,L=F.len,k=W/(L+STAIR*2),X=x=>(x+STAIR)*k;
+  g.clearRect(0,0,W,H);g.fillStyle='rgba(10,12,34,.75)';g.fillRect(0,0,W,H);
+  F.rooms.forEach(r=>{g.fillStyle=MAP_COLORS[r.type];g.fillRect(X(r.x0)+1,4,r.w*k-2,44);
+    textFit(g,r.type==='cls'?r.id:MAP_MARK[r.type],X(r.x0+r.w/2),26,r.w*k-4,16,'#1e1e28');});
+  g.fillStyle='#96a8b4';g.fillRect(2,50,W-4,22);
+  textFit(g,'▲▼',X(-STAIR/2),61,STAIR*k,12,'#1e1e28');textFit(g,'▲▼',X(L+STAIR/2),61,STAIR*k,12,'#1e1e28');
+  const key=F.pickups.find(p=>p.kind==='key');
+  if(key){g.fillStyle='#fadc3c';g.beginPath();g.arc(X(key.x),40,6,0,7);g.fill();}
+  const px=X(P.x),py=P.z<0?4+(1+P.z/DEPTH)*44:52+P.z/CORR*18;
+  g.save();g.translate(px,py);g.rotate(-P.yaw);g.fillStyle='#e6283c';g.strokeStyle='#fff';g.lineWidth=2;
+  g.beginPath();g.moveTo(0,-9);g.lineTo(6,6);g.lineTo(-6,6);g.closePath();g.fill();g.stroke();g.restore();
+}
+function hud(dt){
+  $('hearts').innerHTML='<span style="color:#e63c50">'+'♥'.repeat(Math.max(0,P.hp))+'</span><span style="color:#5a5a64">'+'♥'.repeat(Math.max(0,P.max-P.hp))+'</span>';
+  const w=WEAPONS[P.weapon];$('weapon').textContent=tr(P.weapon)+(w.ammo?'  x'+(P.ammo[P.weapon]||0):'')+(S.hasKey?'  🔑':'');
+  const r=roomAt(P.x,P.z);
+  $('place').textContent=tr('floor',F.n)+' · '+(r?roomName(r):tr((P.x<-3||P.x>F.len+3||P.z<-0.3)?'stairs':'corridor'));
+  const boss=bossHere();
+  $('goal').textContent=tr((r&&r.type==='office')?'goalBoss':(S.hasKey?'goalOffice':'goalKey'));
+  $('boss').classList.toggle('hide',!boss);
+  if(boss){$('bossfill').style.width=Math.max(0,boss.hp/boss.max*100)+'%';$('bossname').textContent=tr(boss.kind==='boss'?'bossName':'strictName');}
+  const d=nearDoor();
+  $('hint').textContent=d?tr(d.locked&&!S.hasKey?'lockedHint':(d.open?'closeHint':'openHint')):'';
+  $('tDoor').classList.toggle('hide',!d);
+  if(S.msgT>0){S.msgT-=dt;if(S.msgT<=0)$('msg').textContent='';}
+  S.mapT-=dt;if(S.mapT<=0){S.mapT=0.1;drawMap();}
+}
+function update(dt){
+  if(S.state!=='play')return;
+  S.time+=dt;
+  updateDoors(dt);updatePlayer(dt);checkStairs();
+  const r=roomAt(P.x,P.z);
+  if(r!==S.lastRoom){S.lastRoom=r;if(r&&r.safe)say('safe');if(r&&r.id==='5-1')say('npc','',4.5);}
+  for(const e of [...enemies]){if(Math.abs(e.x-P.x)<34||e.dead>0)updateEnemy(e,dt);if(S.state!=='play')return;}
+  updateProjectiles(dt);if(S.state!=='play')return;
+  updatePickups(dt);updateParticles(dt);
+  if(S.won){S.winT-=dt;if(S.winT<=0){S.state='win';show('win');unlock();}}
+}
+function render(dt){
+  S.shake=Math.max(0,S.shake-dt);P.hurt=Math.max(0,P.hurt-dt);
+  if(S.state==='menu'){S.time+=dt;camera.position.set(3+Math.sin(S.time*0.15)*2,2,CORR*0.65);camera.rotation.set(-0.1,-Math.PI/2+Math.sin(S.time*0.11)*0.4,0);}
+  else{updateCamera();hud(dt);$('hurt').style.opacity=Math.min(1,P.hurt*1.8);}
+  view.visible=S.state!=='menu';
+  if(S.fade>0)S.fade=Math.max(0,S.fade-dt*1.4);
+  $('fade').style.opacity=Math.min(1,S.fade*1.5);
+  const eye=camera.position.x;   // дальние комнаты и враги не рисуются: телефону легче
+  F.rooms.forEach(r=>{r.group.visible=r.x0-eye<30&&eye-r.x1<30;});
+  F.doors.forEach(d=>{d.mesh.visible=Math.abs(d.x-eye)<34;});
+  enemies.forEach(e=>{e.m.g.visible=Math.abs(e.x-eye)<30;});
+  renderer.render(scene,camera);
+}
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(0.05,Math.max(0,(now-last)/1000));last=now;
+  update(dt);render(dt);requestAnimationFrame(loop);
+}
+goFloor(1);applyLang();setWeapon('fists');show('menu');requestAnimationFrame(loop);
+// для проверки из консоли (и автоматических тестов)
+window.ZS={S,P,PLAN,WEAPONS,KINDS,keys,camera,renderer,scene,floors,get floor(){return F;},get enemies(){return enemies;},
+  startGame,retry,update,render,attack,useDoor,setWeapon,nextWeapon,damage,hurtPlayer,changeFloor,goFloor,pause,resume,toMenu,
+  setLang:l=>{lang=l;applyLang();},T};
+</script>
+</body>
+</html>
