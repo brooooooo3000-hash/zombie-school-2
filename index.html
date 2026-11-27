@@ -27,6 +27,12 @@
   #bossbar{height:16px;background:#4a1620;border:3px solid #000;margin-bottom:3px}
   #bossfill{height:100%;background:#e63c50;width:100%}
   #hurt{position:absolute;inset:0;box-shadow:inset 0 0 90px 30px rgba(230,30,50,.85);opacity:0}
+  #cine{position:fixed;inset:0;z-index:12;touch-action:none}
+  #cine.hide{display:none}
+  #cine i{position:absolute;left:0;right:0;top:0;height:11%;background:#000}
+  #cine i+i{top:auto;bottom:0}
+  #cineText{position:absolute;left:5%;right:5%;bottom:14%;text-align:center;color:#fff;font-size:26px;font-weight:bold;text-shadow:3px 3px 0 #000}
+  #cineSkip{position:absolute;right:16px;bottom:3.5%;color:#a0a0b0;font-size:13px}
   #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:15;display:flex;align-items:center;justify-content:center;
     font-size:34px;font-weight:bold;color:#96e678}
   .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
@@ -147,6 +153,7 @@
   <canvas id="map" width="260" height="260"></canvas>
   <div id="cross"></div>
 </div>
+<div id="cine" class="hide"><i></i><i></i><div id="cineText"></div><div id="cineSkip"></div></div>
 <div id="fade"></div>
 
 <div id="touch" class="hide">
@@ -285,6 +292,38 @@ const T={
  hit:['УДАР','HIT','공격'], jump:['ПРЫЖОК','JUMP','점프'], swap:['СМЕНА','SWAP','교체'], door:['ДВЕРЬ','DOOR','문'],
  openHint:['E — открыть дверь','E — open the door','E — 문 열기'], closeHint:['E — закрыть дверь','E — close the door','E — 문 닫기'],
  lockedHint:['E — заперто','E — locked','E — 잠겨 있음'],
+ home:['Квартира','Apartment','집'], street:['Улица','Street','거리'],
+ goalMorning:['Утренние дела','Morning jobs','아침 할 일'], jobsFirst:['Сначала дела: ','Jobs first: ','먼저 할 일: '],
+ job_wash:['умыться','wash up','세수'], job_dishes:['помыть посуду','wash the dishes','설거지'],
+ takeHint:['E — убрать посуду','E — clear the dishes','E — 그릇 치우기'], sinkHint:['E — помыть посуду','E — wash the dishes','E — 설거지하기'],
+ toiletHint:['E — смыть','E — flush','E — 물 내리기'], flushed:['Шшшух!','Whoosh!','쏴아!'],
+ carry:['Неси посуду к раковине на кухне','Take the dishes to the kitchen sink','그릇을 부엌 싱크대로 가져가요'],
+ d1:['Шшш... губка, пена...','Shhh... sponge, bubbles...','쏴아... 수세미, 거품...'], d2:['Готово, всё блестит!','Done, everything shines!','끝! 반짝반짝!'],
+ bath:['Ванная','Bathroom','욕실'], job_tv:['новости','news','뉴스'], job_eat:['завтрак','breakfast','아침밥'], job_bag:['рюкзак','backpack','가방'],
+ washHint:['E — умыться','E — wash up','E — 세수하기'], tvHint:['E — посмотреть телик','E — watch TV','E — TV 보기'], bagHint:['E — собрать рюкзак','E — pack the backpack','E — 가방 챙기기'],
+ catHint:['E — погладить кота','E — pet the cat','E — 고양이 쓰다듬기'],
+ washed:['Брр, холодная вода! Теперь точно проснулся.','Brr, cold water! Now I’m awake.','으, 차가워! 이제 잠이 깼다.'],
+ bagged:['Рюкзак собран: тетради, пенал, ланч.','Backpack packed: notebooks, pencil case, lunch.','가방 완료: 공책, 필통, 도시락.'],
+ meow:['Мяу! Наби мурчит.','Meow! Nabi purrs.','야옹! 나비가 골골거린다.'], bye:['Пока, Наби! Я в школу.','Bye, Nabi! Off to school.','나비야, 학교 다녀올게!'],
+ w1:['ДЗЫНЬ-ДЗЫНЬ! 07:30','RING-RING! 7:30','따르릉! 07:30'], w2:['Первый день в новой школе в Пусане...','First day at the new school in Busan...','부산 새 학교 첫날...'],
+ w3:['Бабушка ушла на рынок. Пора вставать.','Grandma went to the market. Time to get up.','할머니는 시장에 가셨다. 일어나자.'],
+ tv1:['Срочные новости Пусана.','Busan breaking news.','부산 속보입니다.'], tv2:['Ночью из нескольких школ слышали странный рёв.','Strange roars were heard from several schools last night.','밤사이 여러 학교에서 이상한 울음소리가 들렸습니다.'],
+ tv3:['Учителя не отвечают на звонки. Полиция проверяет.','Teachers aren’t answering their phones. Police are checking.','선생님들이 전화를 받지 않습니다. 경찰이 확인 중입니다.'],
+ tv4:['...Да ну, ерунда какая-то.','...Nah, that’s nonsense.','...에이, 별일 아니겠지.'],
+ e1:['Рис, суп и кимчи. Как бабушка готовит!','Rice, soup and kimchi. Just like grandma makes!','밥, 국, 김치. 할머니 손맛!'],
+ goalEat:['Позавтракай','Eat your breakfast','아침을 먹어요'], goalExit:['Выйди из квартиры','Leave the apartment','집에서 나가요'], goalSchool:['Иди в школу','Walk to school','학교에 가요'],
+ eatHint:['E — позавтракать','E — eat breakfast','E — 아침 먹기'], exitHint:['E — выйти','E — go out','E — 나가기'],
+ ate:['Вкусно! Теперь в школу','Yummy! Now off to school','맛있다! 이제 학교로'], eatFirst:['Сначала позавтракай!','Breakfast first!','먼저 아침을 먹어요!'],
+ liftCall:['Вызвать лифт (E)','Call the elevator (E)','엘리베이터 부르기 (E)'], liftPress:['Нажать «1» (E)','Press “1” (E)','1층 누르기 (E)'],
+ liftCame:['Лифт приехал. Заходи!','The elevator is here!','엘리베이터가 왔어!'], liftGo:['Едем вниз с 20 этажа...','Going down from floor 20...','20층에서 내려가는 중...'], liftDone:['Первый этаж','Ground floor','1층입니다'],
+ goalLift:['Спустись на лифте','Take the elevator down','엘리베이터를 타고 내려가'], goalLobby:['Выйди из подъезда','Leave the building','아파트에서 나가'],
+ hall20:['20 этаж','Floor 20','20층'], lift:['Лифт','Elevator','엘리베이터'], lobby:['Подъезд','Lobby','로비'],
+ redLight:['Красный! Подожди зелёный','Red light! Wait for green','빨간불! 초록불을 기다려'], yard:['Школьный двор','Schoolyard','운동장'],
+ hello0:['Доброе утро!','Good morning!','좋은 아침!'], hello1:['Не опоздай в школу!','Don’t be late for school!','학교에 늦지 마!'], hello2:['Привет! Ты новенький?','Hi! Are you new here?','안녕! 새로 왔어?'],
+ schoolHint:['E — открыть двери школы','E — open the school doors','E — 학교 문 열기'], cutSkip:['Пробел — пропустить','Space or tap — skip','스페이스 / 탭 — 건너뛰기'],
+ cut1:['Первый день в новой школе…','First day at the new school…','새 학교의 첫날…'],
+ cut2:['— Слышите? Кто это там на лестнице?','— Hear that? Who is on the stairs?','— 들려? 계단에 누구야?'], cut3:['ЗОМБИ!!!','ZOMBIES!!!','좀비다!!!'],
+ note1:['Поешь — и в школу!','Eat, then school!','밥 먹고 학교 가!'], note2:['Бабушка ♥','Grandma ♥','할머니 ♥'],
  goalKey:['Найди ключ от кабинета директора (учительская, 3 этаж)','Find the key to the principal’s office (teachers’ room, floor 3)','교장실 열쇠를 찾아요 (3층 교무실)'],
  goalOffice:['Иди в кабинет директора (2 этаж)','Go to the principal’s office (floor 2)','교장실로 가요 (2층)'],
  goalBoss:['Победи директора','Defeat the principal','교장을 물리쳐요'],
@@ -309,7 +348,24 @@ const T={
  watergun:['Водяной пистолет','Water gun','물총'], piebomb:['Пирожковая бомба','Pie bomb','파이 폭탄'],
  r_support:['Класс поддержки','Support class','도움반'], r_korean:['Класс корейского','Korean class','국어 교실'],
  r_first:['Первоклассники','First graders','1학년 놀이방'], r_office:['Кабинет директора','Principal’s office','교장실'],
- r_canteen:['Столовая','Cafeteria','급식실'], r_cls:['Класс {n}','Class {n}','{n}반'],
+ r_canteen:['Столовая','Cafeteria','급식실'], r_wc:['Туалет','Restroom','화장실'],
+ g1:['Худой: Опа, новенький! Куда разогнался?','Skinny: Whoa, new kid! Where’re you rushing?','말라깽이: 어이, 전학생! 어딜 그렇게 급해?'],
+ g2:['Громила: Ррр... (хрустит кулаками)','Brute: Grrr... (cracks knuckles)','덩치: 으르릉... (손가락 우두둑)'],
+ g3:['Пончик: А у тебя в рюкзаке ничего вкусного нет?..','Donut: Got anything tasty in that backpack?..','도넛: 가방에 맛있는 거 없어?..'],
+ g4:['Худой: Хочешь пройти — принеси нам три мороженых из 편의점. Бегом!','Skinny: Wanna pass? Bring us three ice creams from the 편의점. Run!','말라깽이: 지나가고 싶으면 편의점에서 아이스크림 세 개 가져와. 빨리!'],
+ g5:['Пончик: Клубничное! Ты лучший!','Donut: Strawberry! You’re the best!','도넛: 딸기맛! 네가 최고야!'],
+ g6:['Громила: ...Ыы. Норм.','Brute: ...Uh. Cool.','덩치: ...음. 괜찮네.'],
+ g7:['Худой: Ладно, проходи. Мы тоже в школу... наверное.','Skinny: Fine, go on. We’re going to school too... probably.','말라깽이: 됐어, 가. 우리도 학교 간다... 아마.'],
+ goalIce:['Принеси 3 мороженых из 편의점 (морозилка у входа, жёлтая стрелка)','Bring 3 ice creams from the 편의점 (freezer by the door, yellow arrow)','편의점에서 아이스크림 3개 가져오기 (입구 냉동고)'],
+ goalGive:['Отнеси мороженое хулиганам','Take the ice cream to the bullies','불량배들에게 아이스크림 주기'],
+ iceHint:['E — взять 3 мороженых','E — take 3 ice creams','E — 아이스크림 3개 집기'], giveHint:['E — отдать мороженое','E — hand over the ice cream','E — 아이스크림 주기'],
+ gotIce:['Три мороженых! Неси, пока не растаяли','Three ice creams! Hurry before they melt','아이스크림 세 개! 녹기 전에 가져가자'],
+ blocked:['Хулиганы не пускают дальше','The bullies won’t let you pass','불량배들이 길을 막고 있다'],
+ gHelp:['Помогите! Директор нас запер!','Help! The principal locked us in!','살려줘! 교장이 우릴 가뒀어!'],
+ f1:['Худой: Ты... завалил директора?! Один?!','Skinny: You... beat the principal?! Alone?!','말라깽이: 너... 교장을 이겼어?! 혼자서?!'],
+ f2:['Пончик: Мы думали, нам конец! Он нас тут запер!','Donut: We thought we were done for! He locked us in!','도넛: 우리 끝난 줄 알았어! 여기 갇혀 있었거든!'],
+ f3:['Громила: Ыы... спасибо, брат.','Brute: Uh... thanks, bro.','덩치: 음... 고마워.'],
+ f4:['Худой: Ладно, новенький. Ты нормальный. Мороженое с нас!','Skinny: Okay, new kid. You’re alright. Ice cream’s on us!','말라깽이: 좋아, 전학생. 너 괜찮은 놈이다. 아이스크림은 우리가 쏜다!'], r_cls:['Класс {n}','Class {n}','{n}반'],
  r_hall:['Актовый зал','Assembly hall','강당'], r_teachers:['Учительская','Teachers’ room','교무실'],
  r_english:['Зал английского','English hall','영어 체험실'], r_strict:['Строгий английский','Strict English','엄격한 영어 교실'],
  r_pe:['Физкультура {n}','PE room {n}','체육실 {n}'], r_science:['Класс науки','Science room','과학실']
@@ -386,7 +442,8 @@ const INK=0x1e1e28;
 const inkMat=new THREE.MeshBasicMaterial({color:INK,side:THREE.BackSide});
 const lineMat=new THREE.LineBasicMaterial({color:INK});
 let target=scene;   // куда складывать новые предметы (при стройке этажа — в его комнату)
-function add(geo,mat,x,y,z,parent){const m=new THREE.Mesh(geo,asMat(mat));m.position.set(x,y,z);(parent||target).add(m);return m;}
+let FARDZ=0,FARROOT=null;   // при стройке дальней части района всё сдвигается на FARDZ по z
+function add(geo,mat,x,y,z,parent){const m=new THREE.Mesh(geo,asMat(mat)),par=parent||target;m.position.set(x,y,z+(FARDZ&&par===FARROOT?FARDZ:0));par.add(m);return m;}
 function box(w,h,d,mat,x,y,z,parent){return add(new THREE.BoxGeometry(w,h,d),mat,x,y,z,parent);}
 function edged(m){m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),softBuild?softLine:lineMat));return m;}
 function ball(r,mat,x,y,z,parent,ink){const m=add(new THREE.SphereGeometry(r,16,12),mat,x,y,z,parent);
@@ -467,6 +524,14 @@ function drawFace(g,kind,open,W,H){
     brows(0.22,0.22,16,'#5a371e');curve(g,cx-W*0.02,H*0.52,cx+W*0.04,H*0.6,cx-W*0.03,H*0.6,9,'#d89c78');
     curve(g,W*0.33,H*0.72,cx,H*0.9,W*0.69,H*0.68,15,'#8a2a38');
     oval(g,W*0.14,H*0.62,W*0.06,W*0.04,'rgba(240,120,120,.4)');oval(g,W*0.86,H*0.62,W*0.06,W*0.04,'rgba(240,120,120,.4)');}
+  if(kind==='human'||kind==='woman'){const w=kind==='woman';
+    eye(g,L,y,W*0.105,W*0.125,'#ffffff','#3a2418',W*0.062,W*0.01);eye(g,R,y,W*0.105,W*0.125,'#ffffff','#3a2418',W*0.062,-W*0.01);
+    brows(0.21,0.22,w?10:15,'#3a2418');
+    if(w)[[L,-1],[R,1]].forEach(([x,s])=>{curve(g,x-W*0.1,y-H*0.07,x,y-H*0.17,x+W*0.1,y-H*0.07,12,LINE);curve(g,x+s*W*0.09,y-H*0.08,x+s*W*0.13,y-H*0.11,x+s*W*0.15,y-H*0.15,9,LINE);});
+    curve(g,cx-W*0.01,H*0.54,cx+W*0.035,H*0.61,cx-W*0.025,H*0.61,8,'#d89c78');
+    if(w){g.beginPath();g.moveTo(cx-W*0.12,H*0.74);g.quadraticCurveTo(cx,H*0.88,cx+W*0.12,H*0.74);g.quadraticCurveTo(cx,H*0.78,cx-W*0.12,H*0.74);g.fillStyle='#d23c5a';g.fill();g.lineWidth=7;g.strokeStyle='#8a2a38';g.stroke();}
+    else curve(g,W*0.36,H*0.74,cx,H*0.86,W*0.64,H*0.74,13,'#8a2a38');
+    oval(g,W*0.14,H*0.64,W*0.065,W*0.04,'rgba(240,120,120,.38)');oval(g,W*0.86,H*0.64,W*0.065,W*0.04,'rgba(240,120,120,.38)');}
   if(kind==='hero'){eye(g,L,y,W*0.14,W*0.15,'#ffffff','#3a5ac0',W*0.05);eye(g,R,y,W*0.14,W*0.15,'#ffffff','#3a5ac0',W*0.05);
     brows(0.28,0.2,16,'#5a371e');oval(g,cx,H*0.76,W*0.12,H*0.13,'#7a1024',13);oval(g,cx,H*0.82,W*0.07,H*0.05,'#e65070');}
 }
@@ -484,6 +549,10 @@ const LOOKS={
   boss:{skin:GREEN,shade:GREEN_D,shirt:0x373755,sleeve:0x373755,farSleeve:0x23233c,pants:0x464664,foot:GREEN_D,top:0xc8c8cd,tie:0xd22d37,legH:0.92,legW:0.3,tw:0.94,th:0.94,td:0.54,hw:0.76,hh:0.7,hd:0.62,aw:0.25,al:0.92},
   strict:{skin:GREEN,shade:GREEN_D,shirt:0x8c3c5a,sleeve:0x8c3c5a,farSleeve:0x642840,pants:0x32324a,foot:0x32324a,top:0x5a371e,glasses:true,legH:0.88,legW:0.2,tw:0.62,th:0.84,td:0.4,hw:0.66,hh:0.62,hd:0.56,aw:0.17,al:0.8,face:'boss'},
   hero:{skin:0xfad7b4,shade:0xfad7b4,shirt:0x466edc,sleeve:0x8cbeff,farSleeve:0x233c8c,pants:0x3c3c6e,foot:0xe6e6e6,top:0x5a371e,legH:0.6,legW:0.2,tw:0.54,th:0.6,td:0.36,hw:0.62,hh:0.56,hd:0.52,aw:0.16,al:0.6},
+  man:{skin:0xffdcc0,shade:0xf0c4a4,shirt:0x5a96d2,sleeve:0x5a96d2,farSleeve:0x3c6ea6,pants:0x373755,foot:0x2a2a38,top:0x30201a,legH:0.66,legW:0.2,tw:0.56,th:0.62,td:0.36,hw:0.58,hh:0.54,hd:0.5,aw:0.16,al:0.62,face:'human'},
+  woman:{skin:0xffe0c8,shade:0xf4caae,shirt:0xe66e8c,sleeve:0xe66e8c,farSleeve:0xb44e6a,pants:0x50506e,foot:0xf0f0f4,top:0x2a1810,legH:0.62,legW:0.17,tw:0.5,th:0.56,td:0.32,hw:0.58,hh:0.54,hd:0.5,aw:0.14,al:0.56,face:'woman'},
+  grandpa:{skin:0xf4d0b0,shade:0xe2b898,shirt:0x78986a,sleeve:0x78986a,farSleeve:0x56724c,pants:0x4a4a5a,foot:0x3a2a20,top:0xd2d2d8,glasses:true,legH:0.52,legW:0.2,tw:0.6,th:0.6,td:0.4,hw:0.58,hh:0.52,hd:0.5,aw:0.16,al:0.58,face:'human'},
+  pupil:{skin:0xffdcc0,shade:0xf0c4a4,shirt:0xf5f5f0,sleeve:0xf5f5f0,farSleeve:0xc8c8d2,pants:0x23325f,foot:0xf0f0f4,top:0x1e1414,tie:0xd22d37,legH:0.48,legW:0.17,tw:0.48,th:0.5,td:0.3,hw:0.56,hh:0.5,hd:0.48,aw:0.13,al:0.5,face:'human'},
   nerd:{skin:0xfad7b4,shade:0xfad7b4,shirt:0x466edc,sleeve:0x466edc,farSleeve:0x233c8c,pants:0x3c3c6e,foot:0xe6e6e6,top:0x5a371e,glasses:true,legH:0.5,legW:0.18,tw:0.52,th:0.55,td:0.34,hw:0.58,hh:0.52,hd:0.5,aw:0.15,al:0.56}
 };
 function makeModel(kind,over){
@@ -509,7 +578,7 @@ function makeModel(kind,over){
   part(o.hw,o.hh,o.hd,skin,0,0,0,head,0.036,o.hw*0.17);
   if(o.top)part(o.hw+0.02,o.hh*0.24,o.hd+0.02,o.top,0,o.hh*0.4,0,head,0.012);
   if(o.horns)[-1,1].forEach(s=>{part(0.09,0.24,0.09,o.horns,s*o.hw*0.36,o.hh*0.62,0,head,0.022);});
-  const fk=o.face||kind,fw=o.hw*0.94,fh=o.hh*(o.top?0.74:0.94),fy=o.top?-o.hh*0.1:0,calm=fk==='nerd'||fk==='hero';
+  const fk=o.face||kind,fw=o.hw*0.94,fh=o.hh*(o.top?0.74:0.94),fy=o.top?-o.hh*0.1:0,calm=fk==='nerd'||fk==='hero'||fk==='human'||fk==='woman';
   const faces=[false,true].map(open=>open&&calm?null:lam({map:faceTex(fk,open,fh/fw),transparent:true,alphaTest:0.1}));
   const face=plane(fw,fh,faces[0],0,fy,o.hd/2+0.012,0,head);
   if(o.glasses){const y=fy+(0.5-EYE_Y)*fh;   // очки напротив глаз
@@ -526,11 +595,11 @@ const SIDE={u0:1.2,u1:4.8,back:7,wi:0,wo:0.2,bo:0.3},MAIN={u0:2.2,u1:6.6,back:8.
 const room=(type,id,w)=>({type,id,w:w||9});
 const cls=n=>room('cls',n);
 const PLAN=[
-  [room('support'),room('korean'),room('first','1'),room('first','2')],
-  [room('office'),room('canteen',null,18),cls('1-1'),cls('1-2'),cls('1-3'),cls('1-4'),cls('2-1'),cls('2-2'),cls('2-3'),cls('2-4')],
-  [cls('3-1'),cls('3-2'),cls('3-3'),cls('3-4'),cls('4-1'),room('hall',null,18),room('teachers')],
-  [cls('4-2'),cls('4-3'),cls('4-4'),cls('5-1'),cls('5-2'),cls('5-3'),cls('5-4'),room('english',null,18)],
-  [room('strict'),room('pe','1',13),room('pe','2',13),room('science')]
+  [room('support'),room('korean'),room('first','1'),room('first','2'),room('wc',null,7)],
+  [room('office'),room('canteen',null,30),cls('1-1'),cls('1-2'),cls('1-3'),cls('1-4'),cls('2-1'),cls('2-2'),cls('2-3'),cls('2-4'),room('wc',null,7)],
+  [cls('3-1'),cls('3-2'),cls('3-3'),cls('3-4'),cls('4-1'),room('hall',null,18),room('teachers'),room('wc',null,7)],
+  [cls('4-2'),cls('4-3'),cls('4-4'),cls('5-1'),cls('5-2'),cls('5-3'),cls('5-4'),room('english',null,18),room('wc',null,7)],
+  [room('strict'),room('pe','1',13),room('pe','2',13),room('science'),room('wc',null,7)]
 ];
 /* кто где живёт: [вид, x от левой стены, z] и что лежит: [вещь, x, z] */
 PLAN.forEach(f=>f.splice(Math.ceil(f.length/2),0,room('stairs',null,10)));   // главная лестница посередине
@@ -541,8 +610,9 @@ const CONTENT={
   support:{e:[],i:[['pie',3,-6],['pie',6,-6]]},
   cls:{e:[['zombie',4.4,-4],['zombie',6.4,-7],['tall',2.4,-8]],i:[]},
   office:{e:[['boss',4.5,-7]],i:[['pie',1.4,-8],['pie',7.6,-8]]},
-  canteen:{e:[['fat',6,-5],['fat',12,-6],['zombie',9,-3],['zombie',15,-5],['zombie',4,-7]],
-           i:[['watergun',9,-7.6],['pie',5,-4.2],['pie',9,-4.2],['pie',13,-4.2]]},
+  canteen:{e:[['fat',6,-5],['fat',14,-6],['fat',24,-5],['zombie',9,-3],['zombie',15,-5],['zombie',4,-7],['zombie',20,-3],['zombie',26,-6.5],['tall',18,-7.8]],
+           i:[['watergun',15,-7.6],['pie',5.5,-4.6],['pie',10.5,-4.6],['pie',15.5,-4.6],['pie',20.5,-4.6],['pie',25.5,-4.6]]},
+  wc:{e:[['zombie',3.4,-8.2]],i:[]},
   hall:{e:[['giant',8,-6],['zombie',11,-3.4],['zombie',14,-6],['tall',15,-3.4]],i:[['piebomb',2,-6],['pie',16,-7.8]]},
   teachers:{e:[['giant',5.5,-5],['tall',7,-7.5]],i:[['key',3.2,-7],['chair',7.6,-2.6],['pie',2,-2.6]]},
   english:{e:[['zombie',5,-5],['zombie',8,-7],['zombie',11,-4],['tall',14,-6],['zombie',15,-3.4]],i:[['piebomb',9,-7.8],['pie',2.4,-7.8]]},
@@ -553,7 +623,7 @@ const CONTENT={
 const CLASS_ITEMS={'1-2':[['chair',2.4,-7.8]],'1-4':[['pie',7.6,-7.8]],'2-3':[['ruler',2.4,-7.8]],'3-2':[['mop',2.4,-7.8]],
   '3-4':[['pie',2.4,-7.8]],'4-3':[['pie',7.6,-7.8]],'5-1':[['watergun',2.4,-7.8]],'5-3':[['mop',7.6,-7.8]]};
 const CLASS_WALLS=[['#f5e1aa','#e1c88c'],['#e2f0cd','#c8dcaf'],['#f2d8d6','#debebe']];
-const WALLS={corr:['#e2f0cd','#c8dcaf'],office:['#7d4842','#55302c','#6c3c37'],canteen:['#ffe6ae','#e1b478'],hall:['#d2c3e6','#96829f'],
+const WALLS={corr:['#e2f0cd','#c8dcaf'],office:['#7d4842','#55302c','#6c3c37'],canteen:['#ffe6ae','#e1b478'],wc:['#e4f2f8','#a8cad8'],hall:['#d2c3e6','#96829f'],
   teachers:['#cde6f0','#a5c3d2'],english:['#f2d8d6','#debebe'],strict:['#cdc8d2','#968ca0'],pe:['#f0d2a0','#c89664'],
   science:['#d2ebe6','#9bc8c3'],support:['#fff0c8','#bee1b4'],stairs:['#e2f0cd','#c8dcaf']};
 let drandSeed=11;const drand=()=>(drandSeed=(drandSeed*16807)%2147483647)/2147483647;   // «случайность», одинаковая каждый раз
@@ -605,18 +675,20 @@ function lamp(x,z,w){   // светильник: корпус, панель, с�
 const lampLights=[];for(let i=0;i<(isTouch?2:4);i++){const l=new THREE.PointLight(0xffe6bc,0,10,2);scene.add(l);lampLights.push(l);}
 function updateLights(on){   // настоящий свет горит под ближайшими к герою лампами (и с соседних этажей)
   const near=[];
-  if(on)floors.forEach(f=>{if(!f||Math.abs(f.n-F.n)>1)return;const o=f.group.position;
+  if(on)(F.home?[F]:floors).forEach(f=>{if(!f||Math.abs(f.n-F.n)>1)return;const o=f.group.position;
     f.lamps.forEach(a=>{const x=a[0]+o.x,y=a[1]+o.y;near.push([(x-P.x)**2+(y-P.y-2.4)**2+(a[2]-P.z)**2,x,y,a[2]]);});});
   near.sort((a,b)=>a[0]-b[0]);
   lampLights.forEach((l,i)=>{const q=near[i];l.intensity=q?0.55:0;if(q)l.position.set(q[1],q[2],q[3]);});
 }
 
 const floors=[];       // построенные этажи
+let HOME=null;         // квартира и улица (пока герой не дошёл до школы)
 let F=null;            // этаж, на котором герой
 let colliders=[],enemies=[],pickups=[];
 const signs=[];        // таблички и доски: их надписи меняются вместе с языком
 let building=null;
-function solid(x0,x1,z0,z1,top){const c={x0,x1,z0,z1,top,off:false};building.colliders.push(c);return c;}
+function solid(x0,x1,z0,z1,top){z0+=FARDZ;z1+=FARDZ;if(top>1.5)top=9;   // на стены, холодильник и шкафы не залезть: иначе видно школу сверху
+  const c={x0,x1,z0,z1,top,off:false};building.colliders.push(c);return c;}
 function wall(x0,x1,z0,z1,c){const w=x1-x0,d=z1-z0;box(w,ROOM_H,d,wallMat(c,Math.max(w,d)),(x0+x1)/2,ROOM_H/2,(z0+z1)/2);solid(x0,x1,z0,z1,ROOM_H);}
 function ceiling(x0,x1,z0,z1,y){const m=add(new THREE.PlaneGeometry(x1-x0,z1-z0),ceilMat(x1-x0,z1-z0),(x0+x1)/2,y,(z0+z1)/2);m.rotation.x=Math.PI/2;return m;}
 function floorPlane(x0,x1,z0,z1,key,draw){const m=add(new THREE.PlaneGeometry(x1-x0,z1-z0),floorMat(key,draw,x1-x0,z1-z0),(x0+x1)/2,0,(z0+z1)/2);m.rotation.x=-Math.PI/2;return m;}
@@ -752,9 +824,21 @@ function furnish(r){
     edged(box(0.8,0.5,0.1,0x373755,c,1.22,-4.8));ball(0.15,0xd22d37,c+1,1.1,-4.5,null,0.02);
     [0.5,r.w-0.5].forEach(dx=>[-3,-6].forEach(z=>cabinet(x+dx,z,0.7,2,2.4,0x78502d,true)));
     [-2.6,2.6].forEach(dx=>edged(box(0.5,3,0.14,0xe6be46,c+dx,2,-8.72)));}
-  if(t==='canteen'){[-4.2,-7].forEach(z=>[4,9,14].forEach(dx=>{desk(x+dx,z,3.4,0.9,0xe2cea0);
-      edged(box(3.2,0.07,0.3,0x82694a,x+dx,0.42,z+0.75));edged(box(3.2,0.07,0.3,0x82694a,x+dx,0.42,z-0.75));}));
-    edged(box(6,1.05,0.5,0xcdd0dc,c,0.52,-8.55));[-2,0,2].forEach(dx=>{tube(0.28,0.22,0.3,0x9ba0a8,c+dx,1.2,-8.55,null,0.02);ball(0.18,0xe1a046,c+dx,1.34,-8.55);});}
+  if(t==='canteen'){[-3.6,-6.2].forEach(z=>{for(let dx=5.5;dx<r.w-3;dx+=5)desk(x+dx,z,3.4,0.9,0xe2cea0),
+      edged(box(3.2,0.07,0.3,0x82694a,x+dx,0.42,z+0.75)),edged(box(3.2,0.07,0.3,0x82694a,x+dx,0.42,z-0.75));});
+    edged(box(14,1.05,0.55,0xcdd0dc,c,0.52,-8.55));solid(c-7,c+7,-8.85,-8.25,1.05);box(14,0.06,0.6,0xb4bac8,c,1.07,-8.55);
+    for(let dx=-6;dx<=6;dx+=1.5){tube(0.28,0.22,0.3,0x9ba0a8,c+dx,1.25,-8.55,null,0.02);ball(0.18,[0xe1a046,0xf5f5f0,0xd23c28,0x46a05a][Math.round(dx/1.5+4)%4],c+dx,1.38,-8.55);}
+    soft3(14,0.5,0.05,0xf5eee0,c,2.4,-8.9,0.02);label(4,0.6,400,60,c,2.9,-8.79,0,(g,W,H)=>{g.fillStyle='#d23c46';g.fillRect(0,0,W,H);textFit(g,'급식실 · '+tr('r_canteen'),W/2,H/2+2,W-20,40,'#fff');});
+    edged(box(0.6,1.2,0.5,0x5a96d2,x+r.w-0.6,0.6,-1.2));tube(0.18,0.18,0.4,flat({color:0x8cd2ff,transparent:true,opacity:0.7}),x+r.w-0.6,1.4,-1.2);solid(x+r.w-0.9,x+r.w-0.3,-1.45,-0.95,1.2);
+    [[1.4,-1.5],[1.4,-8.2]].forEach(p=>{tube(0.25,0.2,0.7,0x46a05a,x+p[0],0.35,p[1]);solid(x+p[0]-0.25,x+p[0]+0.25,p[1]-0.25,p[1]+0.25,0.75);});}
+  if(t==='wc'){   // туалет: три кабинки у дальней стены, раковины с зеркалами слева
+    [1.0,2.6,4.2,5.8].forEach(dx=>{edged(box(0.06,2.1,1.8,0x5a96d2,x+dx,1.15,-8.1));solid(x+dx-0.05,x+dx+0.05,-9,-7.2,2.1);});
+    [1.8,3.4,5.0].forEach((dx,i)=>{soft3(0.42,0.42,0.55,0xffffff,x+dx,0.21,-8.6,0.1);soft3(0.4,0.55,0.18,0xffffff,x+dx,0.6,-8.86,0.05);solid(x+dx-0.22,x+dx+0.22,-9,-8.3,0.45);
+      const d=edged(box(0.06,1.9,0.75,0x78b4dc,x+dx-0.38,1.05,-6.85));d.rotation.y=0.9+i*0.2;});
+    edged(box(0.55,0.85,3.6,0xe8eef2,x+0.38,0.43,-3.5));solid(x,x+0.66,-5.3,-1.7,0.9);
+    [-4.6,-3.5,-2.4].forEach(z=>{box(0.36,0.03,0.4,0x9ab4c4,x+0.4,0.87,z);tube(0.02,0.02,0.2,0xc8ccd8,x+0.15,0.97,z);plane(0.7,0.8,flat({color:0xcfe6f2}),x+0.012,1.65,z,Math.PI/2);});
+    edged(box(0.2,0.3,0.32,0xc8ccd8,x+0.12,1.3,-6.2));
+    label(1.4,0.5,240,86,c,2.7,-8.97,0,(g,W,H)=>{g.fillStyle='#2c4a9e';g.fillRect(0,0,W,H);textFit(g,'WC · 화장실',W/2,H/2+2,W-16,44,'#fff');});}
   if(t==='hall'){edged(box(3.6,0.5,6,0xa06e46,x+2,0.25,-5.9));solid(x+0.2,x+3.8,-8.9,-2.9,0.5);
     [-8.2,-3.5].forEach(z=>edged(box(0.2,3.2,1.2,0xb43246,x+0.35,2,z)));edged(box(0.2,0.6,6,0xb43246,x+0.35,3.2,-5.9));board(r,x+0.22,1.9,-5.9,Math.PI/2,3);
     [6.5,8.5,10.5,12.5].forEach(dx=>[-3,-5,-7].forEach(z=>chair(x+dx,z,0x3c60aa)));}
@@ -804,6 +888,7 @@ function buildRoom(r){
   const x0=r.x0,x1=r.x1;
   const wc=r.type==='cls'?CLASS_WALLS[(+r.id.split('-')[1])%3]:r.type==='korean'?CLASS_WALLS[0]:r.type==='first'?CLASS_WALLS[2]:WALLS[r.type];
   if(r.type==='office')floorPlane(x0,x1,-DEPTH,0,'office',floorDraw('#5f2837','#4b1e2a'));
+  else if(r.type==='wc')floorPlane(x0,x1,-DEPTH,0,'wc',tiles('#dfeef4','#c8dde8','#9ab4c4'));
   else floorPlane(x0,x1,-DEPTH,0,'room',floorDraw('#966e50','#7d5a41'));
   // у каждой комнаты своя половина общей стены: две стены в одном месте рябят
   wall(x0,x0+0.1,-DEPTH,-0.2,wc);wall(x1-0.1,x1,-DEPTH,-0.2,wc);wall(x0,x1,-DEPTH-0.2,-DEPTH+0.2,wc);
@@ -815,14 +900,606 @@ function buildRoom(r){
   r.doors=[makeDoor(r,a,1),makeDoor(r,b,-1)];
   // окна из класса в коридор, как в корейских школах
   const mid=(a+b)/2,mw=Math.min(b-a-2.2,r.w>10?6:3.2);
-  if(r.type!=='office'){plane(mw,1,windowMat(false),mid,1.9,0.215,0);plane(mw,1,windowMat(false),mid,1.9,-0.215,Math.PI);}
+  if(r.type!=='office'&&r.type!=='wc'){plane(mw,1,windowMat(false),mid,1.9,0.215,0);plane(mw,1,windowMat(false),mid,1.9,-0.215,Math.PI);}
   // табличка с названием над передней дверью
   label(1.9,0.42,384,86,a,3.08,0.24,0,(g,W,H)=>{g.fillStyle=r.type==='office'?'#e6be46':'#f5f5f0';g.fillRect(0,0,W,H);
     g.strokeStyle='#1e1e28';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);textFit(g,roomName(r),W/2,H/2+2,W-30,42,'#1e1e28');});
   furnish(r);dressRoom(r);
   if(r.id==='5-1')sitter(r);
+  if(r.type==='office')trappedGang(r);
   for(let lx=x0+r.w/4;lx<x1-1;lx+=r.w/2)lamp(lx,-4.5,1.7);
 }
+
+/* ====================== РАЙОН: выдуманные улицы от дома до школы ======================
+   z<0 — на север. Ходить можно только по прямоугольникам WALK, всё остальное — дома, дорога и заборы. */
+const LONG=40,GZ=-50;   // на сколько удлинили переулок; где стоят хулиганы
+const TOWN={x1:62,z0:-64-LONG};
+const WALK=[[6.3,26,0,8],[18,26,-22,0],[12,32,-26,-22],[20,24,-36,-26],[16,50,-40,-36],[40,48,-46,-40],[32,58,-62,-46]].map((r,i)=>i===1?[18,26,-22-LONG,0]:i>1?[r[0],r[1],r[2]-LONG,r[3]-LONG]:r);
+const CROSS={x0:20,x1:24},BUS_STOP=34,SCHOOL_DOOR=45,ROAD_FROM=-14,ROAD_LEN=88;
+function townWalls(){   // невидимые стены везде, где не тротуар: режем район на клетки по краям тротуаров
+  const cut=(list,a,b)=>[...new Set([a,b,...list.filter(v=>v>a&&v<b)])].sort((p,q)=>p-q);
+  const xs=cut(WALK.flatMap(r=>[r[0],r[1]]),6.34,TOWN.x1),zs=cut(WALK.flatMap(r=>[r[2],r[3]]),TOWN.z0,9);
+  for(let i=0;i<xs.length-1;i++)for(let j=0;j<zs.length-1;j++){const x=(xs[i]+xs[i+1])/2,z=(zs[j]+zs[j+1])/2;
+    if(!WALK.some(r=>x>r[0]&&x<r[1]&&z>r[2]&&z<r[3]))solid(xs[i],xs[i+1],zs[j],zs[j+1],9);}
+}
+const hex=c=>'#'+c.toString(16).padStart(6,'0');
+function facadeTex(color,cols,rows){   // фасад: плитка, пояса этажей, окна с рамами, шторами, кондиционерами и цветами
+  const key='fac'+color+'_'+cols+'_'+rows;if(texCache[key])return texCache[key];
+  const W=cols*128,H=rows*128+40;
+  return texCache[key]=new THREE.MeshLambertMaterial({map:canvasTex(W,H,(g)=>{
+    g.fillStyle=hex(color);g.fillRect(0,0,W,H);
+    for(let y=0;y<H;y+=12)for(let x=(y/12%2)*14-14;x<W;x+=28){g.fillStyle=drand()<0.5?'rgba(255,255,255,'+drand()*0.12+')':'rgba(60,30,30,'+drand()*0.13+')';g.fillRect(x+1,y+1,26,10);}
+    const sh=g.createLinearGradient(0,0,0,H);sh.addColorStop(0,'rgba(255,255,255,.16)');sh.addColorStop(1,'rgba(30,20,40,.26)');g.fillStyle=sh;g.fillRect(0,0,W,H);
+    for(let r=0;r<rows;r++){const y=40+r*128;g.fillStyle='rgba(255,248,230,.85)';g.fillRect(0,y+112,W,9);g.fillStyle='rgba(40,20,30,.35)';g.fillRect(0,y+121,W,5);
+      for(let c=0;c<cols;c++){const x=c*128+22;g.fillStyle='rgba(40,20,30,.4)';g.fillRect(x+5,y+22,86,82);g.fillStyle='#f2ece0';g.fillRect(x,y+16,86,82);
+        const gl=g.createLinearGradient(x,y+20,x+80,y+94);gl.addColorStop(0,'#d6f1ff');gl.addColorStop(0.45,'#6fa9d4');gl.addColorStop(1,'#2e4f7a');g.fillStyle=gl;g.fillRect(x+6,y+22,74,70);
+        if(drand()<0.55){g.fillStyle=['#e6788c','#f5e1aa','#8cc8a0','#c8aae6'][Math.floor(drand()*4)];g.fillRect(x+6,y+22,16+drand()*22,70);}
+        g.fillStyle='rgba(255,255,255,.4)';g.beginPath();g.moveTo(x+30,y+92);g.lineTo(x+46,y+92);g.lineTo(x+76,y+22);g.lineTo(x+60,y+22);g.fill();
+        g.fillStyle='#f2ece0';g.fillRect(x+41,y+22,5,70);g.fillRect(x-5,y+96,96,8);
+        const k=drand();if(k<0.22){g.fillStyle='#dfe3ea';g.fillRect(x+24,y+100,46,24);g.strokeStyle='#707888';g.lineWidth=2;g.strokeRect(x+24,y+100,46,24);g.fillStyle='#707888';g.beginPath();g.arc(x+36,y+112,8,0,7);g.stroke();for(let i=0;i<4;i++)g.fillRect(x+50,y+104+i*5,16,2);}
+        else if(k<0.4){g.fillStyle='#8a5a3c';g.fillRect(x+14,y+104,58,12);for(let i=0;i<6;i++){g.fillStyle=i%2?'#3c8c50':'#e6506e';g.beginPath();g.arc(x+20+i*9.5,y+102,6,0,7);g.fill();}}}}
+    g.strokeStyle='rgba(30,20,30,.6)';g.lineWidth=6;g.strokeRect(0,0,W,H);})});
+}
+function house(x0,x1,z0,z1,h,color,sides){   // дом: стены с фасадом, карниз, крыша с баком и антенной
+  const w=x1-x0,d=z1-z0,cx=(x0+x1)/2,cz=(z0+z1)/2;
+  box(w,h,d,color,cx,h/2,cz);box(w+0.3,0.22,d+0.3,0xe8dcc8,cx,h+0.11,cz);box(w+0.14,0.5,d+0.14,0x6e5a56,cx,h+0.45,cz);box(w+0.14,0.5,d+0.14,0x9a8a84,cx,0.25,cz);
+  const rows=Math.max(1,Math.round(h/1.9));
+  for(const s of sides){const along=(s==='n'||s==='s')?w:d,m=facadeTex(color,Math.max(1,Math.round(along/2.1)),rows),fh=h-0.5,y=0.5+fh/2;
+    if(s==='s')plane(along,fh,m,cx,y,z1+0.015,0);if(s==='n')plane(along,fh,m,cx,y,z0-0.015,Math.PI);
+    if(s==='e')plane(along,fh,m,x1+0.015,y,cz,Math.PI/2);if(s==='w')plane(along,fh,m,x0-0.015,y,cz,-Math.PI/2);}
+  tube(0.55,0.55,0.8,0x7fb0d2,cx+w*0.2,h+1.1,cz);tube(0.6,0.6,0.1,0x3c60aa,cx+w*0.2,h+1.55,cz);tube(0.03,0.03,1.8,0x50586e,cx-w*0.25,h+1.6,cz);box(0.8,0.04,0.04,0x50586e,cx-w*0.25,h+2.2,cz);
+}
+function sign(w,h,x,y,z,ry,text,bg,color){   // вывеска или указатель
+  return label(w,h,384,Math.round(384*h/w),x,y,z,ry,(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.strokeStyle='#1e1e28';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);
+    textFit(g,text,W/2,H/2+2,W-30,Math.round(H*0.62),color);});
+}
+function shop(x,z,dir,name,bg,color,awning){   // витрина на стене дома; dir: 1 — смотрит на восток, -1 — на запад
+  const ry=dir*Math.PI/2,out=d=>x+dir*d;
+  plane(3.4,2,flat({color:0xfff1c8}),out(0.03),1.15,z,ry);
+  [-1.7,-0.55,0.55,1.7].forEach(k=>box(0.08,2.1,0.09,0x4a3828,out(0.06),1.15,z+k));
+  [0.55,1.15].forEach((y,row)=>[-1.35,-0.95,0.95,1.35].forEach((k,i)=>box(0.06,0.26,0.26,[0xd23c46,0x3c78c8,0x46a05a,0xe6a03c][(i+row)%4],out(0.07),y,z+k)));
+  for(let i=0;i<8;i++){const a=box(0.9,0.08,0.45,i%2?0xf5f5f0:awning,out(0.45),2.45,z-1.57+i*0.45);a.rotation.z=-dir*0.22;}
+  sign(3.4,0.7,out(0.06),3.05,z,ry,name,bg,color);
+}
+function tree(x,z){
+  tube(0.13,0.22,1.7,0x7a5232,x,0.85,z);[[-0.35,1.6,0.7],[0.4,1.7,-0.7]].forEach(b=>{const q=tube(0.05,0.08,0.8,0x7a5232,x+b[0]*0.6,b[1],z);q.rotation.z=b[2];});
+  [[0,2.5,0,0.85,0x4c9c54],[0.65,2.15,0.3,0.6,0x5cb064],[-0.65,2.3,-0.2,0.62,0x3c8c50],[0.2,3.15,-0.2,0.55,0x6ec46c],[-0.3,2.85,0.45,0.5,0x58aa5e],[0.55,2.8,-0.45,0.42,0x78cc70],[-0.5,1.95,0.35,0.4,0x468f50]]
+    .forEach(b=>ball(b[3],b[4],x+b[0],b[1],z+b[2]));
+  tube(0.5,0.55,0.16,0x9a968e,x,0.08,z);tube(0.42,0.42,0.18,0x5a3c28,x,0.09,z);
+}
+function streetLamp(x,z){tube(0.07,0.09,3.2,0x50586e,x,1.6,z);box(0.5,0.18,0.3,0xfff6c8,x,3.25,z);}
+function makeCar(color,bus){
+  const was=softBuild;softBuild=false;const g=new THREE.Group();target.add(g);const L=bus?6.4:3.2,W=bus?2.1:1.7,glass=0x9fd8f5;
+  if(bus){part(L,1.75,W,color,0,1.38,0,g,0.04,0.3);for(let i=0;i<5;i++)part(0.86,0.7,W+0.05,glass,-2.3+i*1.15,1.7,0,g,0.018,0.08);
+    part(L+0.05,0.2,W+0.04,0xf5f5f0,0,0.9,0,g,0.012,0.05);part(0.08,0.9,W-0.35,glass,L/2,1.6,0,g,0.018,0.03);part(1.1,0.25,W*0.6,0xf5f5f0,-0.6,2.34,0,g,0.02,0.08);}
+  else{part(L,0.66,W,color,0,0.72,0,g,0.036,0.28);part(1.85,0.66,W-0.14,color,-0.25,1.28,0,g,0.032,0.3);
+    [-0.68,0.18].forEach(x=>part(0.72,0.38,W-0.09,glass,x,1.34,0,g,0.016,0.1));part(0.1,0.4,W-0.4,glass,0.66,1.33,0,g,0.016,0.04);}
+  [-L/2+0.65,L/2-0.65].forEach(x=>[-W/2,W/2].forEach(z=>{const w=tube(0.37,0.37,0.26,0x20202a,x,0.37,z,g,0.02);w.rotation.x=Math.PI/2;
+    const hub=tube(0.17,0.17,0.29,0xd8dce6,x,0.37,z,g);hub.rotation.x=Math.PI/2;}));
+  [-W/2+0.32,W/2-0.32].forEach(z=>{part(0.1,0.18,0.34,0xfff6b0,L/2,0.78,z,g,0.012,0.05);part(0.1,0.18,0.34,0xe6283c,-L/2,0.78,z,g,0.012,0.05);});
+  [L/2,-L/2].forEach(x=>part(0.16,0.16,W+0.04,0xc8ccd8,x,0.45,0,g,0.014,0.06));if(!bus)[-1,1].forEach(s=>part(0.14,0.14,0.2,color,0.62,1.05,s*(W/2+0.06),g,0.012));
+  softBuild=was;return g;
+}
+function makePerson(kind,over,extra){   // человек собран так же, как зомби: скруглённые части, контур, лицо в высоком разрешении
+  const was=softBuild;softBuild=false;const m=makeModel(kind,over),o=Object.assign({},LOOKS[kind],over),h=m.head,hair=o.top;
+  part(o.hw+0.05,o.hh*0.42,0.16,hair,0,o.hh*0.2,-o.hd/2+0.02,h,0.014);
+  [-1,1].forEach(s=>part(0.09,o.hh*0.3,o.hd*0.5,hair,s*(o.hw/2),o.hh*0.22,-o.hd*0.14,h,0.012));
+  if(kind==='woman'){part(o.hw+0.06,o.hh*0.9,0.18,hair,0,-o.hh*0.12,-o.hd/2,h,0.016);[-1,1].forEach(s=>part(0.11,o.hh*0.74,0.2,hair,s*(o.hw/2+0.01),-o.hh*0.14,-o.hd*0.16,h,0.014));}
+  if(extra==='bag'){part(o.tw*0.74,o.th*0.72,0.2,0xd23c46,0,o.legH+o.th*0.52,-o.td/2-0.1,m.g,0.022);part(o.tw*0.46,o.th*0.24,0.07,0xf0f0f4,0,o.legH+o.th*0.4,-o.td/2-0.22,m.g,0.012);}
+  if(extra==='hanbok'){part(o.tw*1.35,o.legH*0.95,o.td*1.5,0x3c60aa,0,o.legH*0.56,0,m.g,0.024,0.14);}
+  m.arms.forEach(a=>a.rotation.x=Math.PI/2);target.add(m.g);softBuild=was;return m;
+}
+function longAlley(f){   // переулок удлинён на LONG метров: дома, лавки, стройка, где надо петлять
+  const z0=-22,z1=-22-LONG;
+  [[10,17.9,-34,-22.2,6.5,0xe6c8a0],[10,17.9,-47,-34.2,8,0xa8c0e0],[11.8,17.9,-62,-47.2,5.6,0xd8b4e6],
+   [26.1,34,-30,-22.2,7,0xb8d8a8],[26.1,34,-44,-30.2,6,0xf0d890],[26.1,34,-62,-44.2,7.5,0xe6b4a0]].forEach(h=>house(h[0],h[1],h[2],h[3],h[4],h[5],''));
+  shop(17.9,-27,1,'행복 약국','#46a05a','#ffffff',0x46a05a);
+  shop(17.9,-40,1,'꿈 PC방','#2a2a50','#78e6ff',0x3c3c78);
+  shop(26.1,-36,-1,'초록 세탁소','#e8f4fa','#2a6e8c',0x5ab4dc);
+  shop(26.1,-53,-1,'바다 치킨','#e6a03c','#ffffff',0xd23c46);
+  [-28,-41,-54].forEach(z=>{streetLamp(18.4,z);streetLamp(25.6,z+6);});
+  // стройка: ограждения через полпереулка, змейкой
+  const stripe=mat2('stripe',64,64,(g,w,h)=>{g.fillStyle='#f5f5f0';g.fillRect(0,0,w,h);g.fillStyle='#e66e28';for(let i=-2;i<4;i++){g.beginPath();g.moveTo(i*24,0);g.lineTo(i*24+12,0);g.lineTo(i*24+12+h,h);g.lineTo(i*24+h,h);g.fill();}},4,1);
+  [[18,23.2,-29],[20.8,26,-33],[18,23.2,-37]].forEach(([a,b,z])=>{edged(box(b-a,1.0,0.25,stripe,(a+b)/2,0.5,z));[a+0.2,b-0.2].forEach(x=>box(0.16,1.1,0.4,0x50586e,x,0.55,z));solid(a,b,z-0.15,z+0.15,9);});
+  sign(1.6,0.6,22,1.6,-28.8,0,'공사중 ⚠','#e6be3c','#1e1e28');
+  [[19,-31],[25,-35]].forEach(p=>{tube(0.05,0.25,0.6,0xe66e28,p[0],0.3,p[1]);box(0.4,0.04,0.4,0x2a2a38,p[0],0.02,p[1]);});
+  sign(1.7,0.55,25.9,2.3,-60,-Math.PI/2,'학교 ↑','#469650','#ffffff');
+}
+const GANG_LOOK={
+  thin:{legH:0.74,legW:0.14,tw:0.4,th:0.66,td:0.26,hw:0.5,hh:0.54,shirt:0x2a2a38,sleeve:0x2a2a38,farSleeve:0x1a1a24,pants:0x3a3a4a,top:0x8a4a1e,tie:0},
+  brute:{legH:0.7,legW:0.3,tw:0.95,th:0.85,td:0.55,hw:0.64,hh:0.6,shirt:0x8c2a2a,sleeve:0x8c2a2a,farSleeve:0x641e1e,pants:0x2a2a3a,top:0x111111,tie:0},
+  fat:{legH:0.42,legW:0.26,tw:1.1,th:0.78,td:0.8,hw:0.62,hh:0.58,shirt:0xe6be3c,sleeve:0xe6be3c,farSleeve:0xb4942c,pants:0x3c3c6e,top:0x3a2a1a,tie:0}};
+const gangModels=()=>['thin','brute','fat'].map(k=>makePerson('pupil',GANG_LOOK[k],''));
+const ICE={x:18.55,z:-8.7};   // морозилка с мороженым у входа в 편의점
+function buildGang(f){   // трое хулиганов перегородили переулок
+  edged(box(0.75,0.85,1.5,0xf0f2f6,ICE.x,0.43,ICE.z));box(0.62,0.06,1.32,0x8cd2ff,ICE.x,0.87,ICE.z);
+  [0xff96c8,0xfadc3c,0x96e678,0xffffff].forEach((c,i)=>box(0.12,0.05,0.22,c,ICE.x-0.15+(i%2)*0.3,0.85,ICE.z-0.4+i*0.26));
+  sign(1.3,0.4,ICE.x+0.05,1.55,ICE.z,Math.PI/2,'아이스크림','#ff96c8','#ffffff');solid(ICE.x-0.38,ICE.x+0.38,ICE.z-0.75,ICE.z+0.75,0.9);
+  f.iceArrow=add(new THREE.ConeGeometry(0.28,0.55,4),flat({color:0xfadc3c}),ICE.x,2.4,ICE.z);f.iceArrow.rotation.x=Math.PI;f.iceArrow.visible=false;
+  const g={stage:'wait',have:false,t:0,col:solid(18,26,GZ-0.5,GZ+0.3,9),models:gangModels()};
+  g.models.forEach((m,i)=>{m.g.position.set(19.8+i*2.2,0,GZ);});
+  f.gang=g;
+}
+function updateGang(dt){
+  const g=F.gang;if(!g)return;const t=F.time;
+  g.models.forEach((m,i)=>{if(!m.g.visible)return;const s=Math.sin(t*(i===1?6:3)+i);
+    if(g.stage==='leave'){m.g.position.z-=dt*3.2;m.g.rotation.y=Math.PI;const w=Math.sin(t*9+i)*0.5;m.legs[0].rotation.x=w;m.legs[1].rotation.x=-w;return;}
+    m.g.rotation.y=Math.atan2(P.x-m.g.position.x,P.z-m.g.position.z)*0.6;
+    m.arms[0].rotation.x=Math.PI/2-(i===1?0.9+s*0.25:i===0?0.2+s*0.1:0.05);m.arms[1].rotation.x=Math.PI/2-(i===1?0.9-s*0.25:i===0?1.4:0.05);});
+  F.iceArrow.visible=g.stage==='ice'&&!g.have;if(F.iceArrow.visible){F.iceArrow.position.y=2.4+Math.abs(Math.sin(t*3))*0.35;F.iceArrow.rotation.y=t*2;}
+  if(g.stage==='leave'){g.t+=dt;if(g.t>4)g.models.forEach(m=>m.g.visible=false),g.stage='gone';}
+  if(g.stage==='wait'&&F.out&&P.z<GZ+6.5&&P.x>17&&P.x<27)meetGang();
+  if((g.stage==='wait'||g.stage==='ice')&&P.z<GZ+1.2&&P.z>GZ-1&&!hc)say('blocked','',1.5);
+}
+function meetGang(){
+  const g=F.gang;g.stage='talk';
+  homeCut([[0,P.x,0,P.z,P.yaw,0],[0.8,22,0,GZ+3.4,0,0.06],[11,22,0,GZ+3.4,0,0.06],[11.4,22,0,GZ+3.6,0,0]],
+    [[0.8,3.4,'g1'],[3.4,5.4,'g2'],[5.4,8,'g3'],[8,11.4,'g4']],[[3.5,()=>SND.roar()]],()=>{g.stage='ice';say('goalIce','',3.5);});
+}
+function giveGang(){
+  const g=F.gang;g.have=false;
+  homeCut([[0,P.x,0,P.z,P.yaw,0],[0.8,22,0,GZ+3.2,0,0.06],[7.6,22,0,GZ+3.2,0,0.06],[8,22,0,GZ+3.4,0,0]],
+    [[0.8,3,'g5'],[3,4.8,'g6'],[4.8,8,'g7']],[[0.9,()=>{burst(24.2,1.2,GZ,0xff96c8,12);SND.pick();}]],
+    ()=>{g.stage='leave';g.t=0;g.col.off=true;say('goalSchool','',3);});
+}
+function trappedGang(r){   // в кабинете директора: хулиганы прижались к стене
+  const ms=gangModels();ms.forEach((m,i)=>{m.g.position.set(r.x0+6.0+i*0.95,0,-8.25);m.arms.forEach(a=>a.rotation.x=0.1+i*0.1);});r.trapped=ms;
+}
+function finalCut(done){   // после победы над директором
+  const r=F.rooms.find(q=>q.type==='office'),ms=r&&r.trapped;if(!ms){done();return;}
+  const cx=r.x0+6.95,yaw=Math.atan2(-(cx-(r.x0+4.6)),-(-8.25+4.8));
+  homeCut([[0,P.x,0,P.z,P.yaw,0],[1,r.x0+4.6,0,-4.8,yaw,-0.05],[12,r.x0+4.6,0,-4.8,yaw,-0.05]],
+    [[1,3.6,'f1'],[3.6,6.3,'f2'],[6.3,8.4,'f3'],[8.4,12,'f4']],
+    [[1.2,()=>ms.forEach(m=>{m.arms.forEach(a=>a.rotation.x=Math.PI/2);m.g.rotation.y=Math.atan2(r.x0+4.6-m.g.position.x,-4.8-m.g.position.z);})],
+     [6.4,()=>burst(cx,1.5,-8.2,0xff96c8,14)]],done);
+}
+function buildDistrict(f){
+  const plain=c=>(g,w,h)=>{g.fillStyle=c;g.fillRect(0,0,w,h);speckle(g,w,h,900,0.14);};
+  townWalls();
+  const under=floorPlane(-12,76,-76-LONG,20,'grass',plain('#74b058'));FARROOT=f.group;under.position.y=-0.04;
+  WALK.slice(0,6).forEach((r,i)=>{const p=floorPlane(r[0],r[1],r[2],r[3],'street',tiles('#c8c4bc','#bab6ae','#9a968e'));p.position.y=i*0.001;});
+  FARDZ=-LONG;
+  const road=floorPlane(-14,74,-36,-26,'road',plain('#585864'));road.position.y=0.01;
+  for(let x=-12;x<72;x+=3)if(x<17||x>26)box(1.4,0.01,0.16,0xf5d750,x,0.02,-31);
+  for(let z=-26.7;z>-35.8;z-=1.1)box(3.6,0.012,0.55,0xf5f5f0,22,0.022,z);                       // зебра
+  box(0.25,0.012,4.4,0xf5f5f0,18.6,0.022,-28.5);box(0.25,0.012,4.4,0xf5f5f0,25.4,0.022,-33.5);   // стоп-линии
+  [-25.95,-36.05].forEach(z=>[[-14,CROSS.x0],[CROSS.x1,74]].forEach(([a,b])=>box(b-a,0.14,0.14,0x8c8c96,(a+b)/2,0.07,z)));
+  FARDZ=0;
+  /* первая улица: от двери дома на восток */
+  fence((u,v)=>[u,v],6.6,8.15,25.8,8.15);[10,16,22].forEach(x=>tree(x,10.2));streetLamp(13,0.35);
+  house(7,12.4,-8,-0.35,6,0xe6b4a0,'s');house(12.6,17.7,-10,-0.35,7.5,0xa0c8e6,'se');house(26.35,34,-6,10,6.5,0xf0d890,'w');
+  sign(1.7,0.55,26.2,2.2,2,-Math.PI/2,'← 학교','#469650','#ffffff');
+  /* торговый переулок: поворот на север */
+  house(10,17.9,-22,-10.2,6,0xb4d8a8,'s');house(26.1,34,-15,-6.2,7,0xd8b4e6,'');house(26.1,34,-22,-15.2,5.6,0xf0b4b4,'');
+  shop(17.9,-6,1,'달빛 편의점 24','#2c4a9e','#fff6a8',0x3c78e0);
+  shop(17.9,-16,1,'별 문구','#e6be3c','#1e1e28',0xe6a03c);
+  shop(26.1,-10.5,-1,'구름 빵집','#fff1dc','#8a4a28',0xd2646e);
+  shop(26.1,-18.5,-1,'호랑이 분식','#d23c46','#ffffff',0xd23c46);
+  edged(box(0.7,1.8,0.9,0xd23c46,18.4,0.9,-1.6));plane(0.65,1,flat({color:0xcfefff}),18.77,1.15,-1.6,Math.PI/2);solid(18,18.8,-2.1,-1.1,1.8);  // автомат с напитками
+  edged(box(0.7,0.8,1.4,0xf0f2f6,25.55,0.4,-14));box(0.6,0.06,1.25,0x8cd2ff,25.55,0.83,-14);solid(25.15,26,-14.75,-13.25,0.85);          // морозилка с мороженым
+  longAlley(f);
+  FARDZ=-LONG;
+  [[-12,'s'],[32.2,'s']].forEach(([x])=>tree(x+0.9,-24));streetLamp(13,-25.4);streetLamp(30.5,-25.4);
+  house(2,11.7,-24.5,-18,5,0xcdd0dc,'e');house(34.5,46,-25,-15,6.5,0xa0c8e6,'s');house(47,60,-25,-16,8,0xe6b4a0,'s');
+  /* за дорогой */
+  house(6,15.7,-47,-36.2,7,0xf0d890,'se');house(16.2,28,-49,-40.35,6,0xd8b4e6,'s');house(28.2,31.6,-52,-40.35,8.5,0xb4d8a8,'s');house(50.4,62,-45.6,-36.2,6.5,0xa0c8e6,'sw');
+  house(32,39.6,-45.6,-40.35,4.2,0xf0b4b4,'s');
+  sign(1.8,0.55,17.4,2.3,-39.75,0,'학교 →','#469650','#ffffff');
+  sign(1.8,0.55,38.8,2.3,-39.75,0,'학교 →','#469650','#ffffff');
+  sign(1.8,0.55,44,3.1,-45.8,0,'부산 학교 ↑','#469650','#ffffff');
+  /* остановка */
+  [BUS_STOP-1.5,BUS_STOP+1.5].forEach(x=>tube(0.06,0.06,2.4,0x50586e,x,1.2,-39.6));box(3.6,0.12,1.2,0x3c78c8,BUS_STOP,2.45,-39.3);
+  edged(box(2.4,0.09,0.4,0xc8905a,BUS_STOP,0.46,-39.5));[-1,1].forEach(s=>box(0.08,0.44,0.34,0x4a4a60,BUS_STOP+s,0.22,-39.5));solid(BUS_STOP-1.2,BUS_STOP+1.2,-39.75,-39.28,0.5);
+  tube(0.05,0.05,2.6,0x50586e,BUS_STOP+2.3,1.3,-36.5);sign(1,0.5,BUS_STOP+2.3,2.75,-36.5,0,'버스','#3c78c8','#ffffff');solid(BUS_STOP+2.2,BUS_STOP+2.4,-36.6,-36.4,9);
+  /* светофор для пешеходов */
+  f.lights=[];
+  [[-25.7,Math.PI],[-36.3,0]].forEach(([z,ry])=>{const x=CROSS.x1+0.4;tube(0.08,0.09,2.8,0x50586e,x,1.4,z);edged(box(0.46,0.9,0.24,0x20202a,x,3.15,z));
+    const red=flat({color:0x500c10}),green=flat({color:0x0c4018}),dz=ry?-0.13:0.13;
+    plane(0.32,0.32,red,x,3.37,z+dz,ry);plane(0.32,0.32,green,x,2.93,z+dz,ry);f.lights.push({red,green});
+    plane(0.32,0.32,red,x,3.37,z-dz,ry+Math.PI);plane(0.32,0.32,green,x,2.93,z-dz,ry+Math.PI);});
+  f.barriers=[solid(CROSS.x0,CROSS.x1,-26.25,-26,9),solid(CROSS.x0,CROSS.x1,-36,-35.75,9)];
+  /* школьный двор и школа */
+  const yard=floorPlane(32,58,-62,-46,'yard',plain('#d8b87a'));yard.position.y=0.006;
+  const path=floorPlane(40,48,-46,-40,'street',tiles('#c8c4bc','#bab6ae','#9a968e'));path.position.y=0.008;
+  [[32,40],[48,58]].forEach(([a,b])=>fence((u,v)=>[u,v],a,-45.85,b,-45.85));fence((u,v)=>[u,v],31.85,-61.6,31.85,-46);fence((u,v)=>[u,v],58.15,-61.6,58.15,-46);
+  [39.8,48.2].forEach(x=>{edged(box(0.6,2.4,0.6,0x965f32,x,1.2,-45.9));ball(0.32,0xe6be46,x,2.65,-45.9);});
+  edged(box(28,11,1,0xe0bc90,SCHOOL_DOOR,5.5,-62.5));box(28.4,0.4,1.2,0x965f32,SCHOOL_DOOR,11.2,-62.5);
+  [2.3,5.4,8.5].forEach((y,row)=>[-12,-9,-6,-3,0,3,6,9,12].forEach(d=>{if(row===0&&Math.abs(d)<4)return;plane(1.8,1.5,windowMat(false),SCHOOL_DOOR+d,y,-61.98,0);box(2.1,0.14,0.14,0xf0e4d0,SCHOOL_DOOR+d,y-0.82,-61.96);}));
+  plane(2.8,2.9,flat({color:0x241a30}),SCHOOL_DOOR,1.45,-61.97,0);[-1.55,1.55].forEach(d=>edged(box(0.16,2.9,0.35,0x7e3a40,SCHOOL_DOOR+d,1.45,-61.8)));box(3.6,0.2,0.5,0x965f32,SCHOOL_DOOR,3.0,-61.75);
+  sign(3.6,0.85,SCHOOL_DOOR,3.65,-61.45,0,'부산 학교','#f5f5f0','#1e1e28');
+  {const prev=target;f.schoolDoors=[-1,1].map(k=>{const g=new THREE.Group();g.position.set(SCHOOL_DOOR+k*1.45,0,-61.72-LONG);prev.add(g);target=g;   // двустворчатые двери
+      const cx=-k*0.72;edged(box(1.42,2.84,0.1,0x2c5a8c,cx,1.43,0));
+      plane(1.06,1.5,flat({color:0x9fd8f5}),cx,1.85,0.056,0);plane(0.16,1.5,flat({color:0xd8f2ff}),cx-0.22,1.85,0.058,0);
+      box(1.1,0.07,0.04,0x1e3c60,cx,1.85,0.07);box(1.1,0.55,0.04,0x3c78a8,cx,0.55,0.06);
+      box(0.07,0.7,0.09,0xf0c850,-k*1.28,1.25,0.11);return {g,k};});target=prev;}
+  f.schoolOpen=0;f.schoolCol=solid(SCHOOL_DOOR-1.5,SCHOOL_DOOR+1.5,-61.85,-61.62,9);
+  tube(0.05,0.07,5,0x8c8c96,34.5,2.5,-49);box(1.3,0.75,0.04,0xd22d37,35.2,4.6,-49);                // флаг
+  [[33.5,-59],[56.5,-59],[56.5,-50]].forEach(p=>{tree(p[0],p[1]);solid(p[0]-0.35,p[0]+0.35,p[1]-0.35,p[1]+0.35,9);});
+  [[51,-55],[55,-55]].forEach(p=>{tube(0.07,0.07,2,0xf5f5f0,p[0],1,p[1]);});box(4,0.12,0.12,0xf5f5f0,53,2.05,-55);   // ворота на площадке
+  /* машины и автобус: две полосы */
+  // мелочи: столбы с проводами, люки, урны, клумбы, велосипеды
+  FARDZ=0;
+  const poles=list=>list.forEach((p,i,a)=>{tube(0.1,0.13,5.4,0x9a958c,p[0],2.7,p[1]);box(0.9,0.09,0.09,0x50586e,p[0],5.1,p[1]);
+    const n=a[i+1];if(n){const dx=n[0]-p[0],dz=n[1]-p[1];[-0.35,0.35].forEach(o=>{const w=box(0.025,0.025,Math.hypot(dx,dz),0x2a2a38,p[0]+dx/2+o,5.15,p[1]+dz/2);w.rotation.y=Math.atan2(dx,dz);});}
+    solid(p[0]-0.14,p[0]+0.14,p[1]-0.14,p[1]+0.14,9);});
+  poles([[24.9,-1.2],[24.9,-11],[24.9,-20.6],[24.9,-32],[24.9,-44],[24.9,-56]]);
+  const hole=flat({transparent:true,map:canvasTex(96,96,g=>{g.fillStyle='#4a4a54';g.beginPath();g.arc(48,48,44,0,7);g.fill();g.strokeStyle='#2a2a32';g.lineWidth=6;g.stroke();
+    for(let i=-3;i<4;i++){g.beginPath();g.moveTo(18,48+i*11);g.lineTo(78,48+i*11);g.lineWidth=3;g.stroke();}})});
+  const holes=l=>l.forEach(p=>{const m=plane(0.9,0.9,hole,p[0],0.03,p[1],0);m.rotation.x=-Math.PI/2;});holes([[11,3],[21,-8],[23,-17],[20.5,-38],[23,-55]]);
+  const bins=l=>l.forEach(p=>{tube(0.24,0.2,0.75,0x46a05a,p[0],0.38,p[1]);tube(0.27,0.27,0.08,0x2a2a38,p[0],0.8,p[1]);solid(p[0]-0.25,p[0]+0.25,p[1]-0.25,p[1]+0.25,0.85);});bins([[17.2,0.5],[25.5,-20],[18.5,-47]]);
+  const flowers=l=>l.forEach(p=>{edged(box(1.3,0.35,0.5,0xb4643c,p[0],0.18,p[1]));for(let i=0;i<6;i++){ball(0.14,0x46a05a,p[0]-0.5+i*0.2,0.45,p[1]);ball(0.08,[0xe6506e,0xfadc3c,0xf5f5f0][i%3],p[0]-0.5+i*0.2,0.58,p[1]+0.05);}solid(p[0]-0.65,p[0]+0.65,p[1]-0.25,p[1]+0.25,0.4);});flowers([[9,0.5],[15.5,0.5]]);
+  FARDZ=-LONG;poles([[15,-39.7],[27,-39.7],[42,-39.7]]);holes([[26,-37.5],[9,-29],[40,-30.5]]);bins([[30,-39.5]]);flowers([[33,-47],[56,-47]]);FARDZ=0;
+  [[25.7,-3.6],[25.7,-4.8]].forEach(p=>{[-0.45,0.45].forEach(d=>{const w=add(new THREE.TorusGeometry(0.32,0.045,8,22),0x2a2a38,p[0],0.36,p[1]+d);w.rotation.y=Math.PI/2;});
+    box(0.05,0.05,0.9,0x3c78c8,p[0],0.55,p[1]);box(0.05,0.35,0.05,0x3c78c8,p[0],0.7,p[1]+0.4);box(0.16,0.06,0.25,0x20202a,p[0],0.72,p[1]-0.25);});
+  f.sky=new THREE.Mesh(new THREE.SphereGeometry(62,32,16),new THREE.MeshBasicMaterial({side:THREE.BackSide,fog:false,map:canvasTex(1024,512,(g,w,h)=>{
+    const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#4f9be8');gr.addColorStop(0.45,'#a8d8ff');gr.addColorStop(0.52,'#e8f4ff');gr.addColorStop(1,'#dcecff');g.fillStyle=gr;g.fillRect(0,0,w,h);
+    for(let i=0;i<26;i++){const x=drand()*w,y=60+drand()*150;for(let k=0;k<9;k++){g.fillStyle='rgba(255,255,255,'+(0.35+drand()*0.4)+')';g.beginPath();g.ellipse(x+(drand()-0.5)*90,y+(drand()-0.5)*16,16+drand()*26,9+drand()*12,0,0,7);g.fill();}}
+    [['#9db8d8',232],['#7c9cc4',246]].forEach(([c,base],n)=>{g.fillStyle=c;g.beginPath();g.moveTo(0,h);for(let x=0;x<=w;x+=64)g.lineTo(x,base-Math.sin(x*0.013+n*2)*14-drand()*14);g.lineTo(w,h);g.fill();});})}));
+  f.group.add(f.sky);
+  f.cars=[];
+  [[1,-28.5-LONG,[[-8,0xd23c46],[24,0xf5f5f0],[52,0x3c78c8]]],[-1,-33.5-LONG,[[60,0xe6be3c],[10,0x46a05a]]]].forEach(([dir,z,list])=>
+    list.forEach(([x,c])=>{const g=makeCar(c);g.position.set(x,0,z);g.rotation.y=dir>0?0:Math.PI;f.cars.push({g,x,z,dir,len:3.2,speed:7,wait:0});}));
+  {const g=makeCar(0x3ca05a,true);g.position.set(70,0,-33.5-LONG);g.rotation.y=Math.PI;f.cars.push({g,x:70,z:-33.5-LONG,dir:-1,len:6.4,speed:6,wait:0,bus:true,stopped:false});}
+  /* люди */
+  f.people=[];
+  [['man',null,'',[8,5.8],[24,5.8],1.1],['woman',null,'',[19.6,-3],[19.6,-20],1.0],
+   ['pupil',null,'bag',[24.6,-4],[24.6,-20],1.5],['grandpa',null,'',[13,-23.5],[30,-23.5],0.7],
+   ['pupil',{top:0x4a2a18},'bag',[18,-38],[47,-38],1.4],['woman',{shirt:0xf0d890,sleeve:0xf0d890,farSleeve:0xc8b064},'hanbok',[48,-37.2],[26,-37.2],0.8],
+   ['pupil',null,'bag',[36,-50],[52,-58],1.3],['man',{shirt:0x46a05a,sleeve:0x46a05a,farSleeve:0x2f7040},'',[54,-49],[36,-56],0.9],
+   ['woman',{shirt:0xd2646e,sleeve:0xd2646e,farSleeve:0xa04a54},'',[19.4,-38.5],[19.4,-47],0.9],['grandpa',null,'',[24.6,-60],[24.6,-52],0.5]].forEach((r,i)=>{
+    const far=pt=>pt[1]<-21.5&&i<8?[pt[0],pt[1]-LONG]:pt;
+    const q=[0,0,0,0,far(r[3]),far(r[4]),r[5]];
+    const m=makePerson(r[0],r[1],r[2]);m.g.position.set(q[4][0],0,q[4][1]);
+    f.people.push(Object.assign(m,{a:q[4],b:q[5],speed:q[6],t:(i*0.23)%1,back:false,step:i,said:false}));});
+  buildGang(f);
+  f.time=0;f.warned=false;
+}
+function updateStreet(dt){
+  const f=F;f.time+=dt;f.sky.position.set(P.x,0,P.z);f.sky.visible=P.z<20;const c=f.time%18,carsGo=c<9,walkGo=c>=10.5&&c<17;
+  const onRoad=P.x>CROSS.x0-0.5&&P.x<CROSS.x1+0.5&&P.z<-26.3-LONG&&P.z>-35.7-LONG;
+  const blink=walkGo&&c>15&&Math.floor(c*4)%2===0;
+  f.lights.forEach(l=>{l.red.color.setHex(walkGo?0x500c10:0xff3040);l.green.color.setHex(walkGo&&!blink?0x30ff60:0x0c4018);});
+  f.barriers.forEach(b=>{b.off=walkGo||onRoad;});
+  if(!walkGo&&!onRoad&&P.x>CROSS.x0&&P.x<CROSS.x1&&(Math.abs(P.z+25.4+LONG)<0.7||Math.abs(P.z+36.6+LONG)<0.7)){if(!f.warned){f.warned=true;say('redLight','',2.5);}}
+  if(walkGo)f.warned=false;
+  for(const car of f.cars){
+    if(car.wait>0){car.wait-=dt;continue;}
+    let step=car.speed*dt;
+    const line=car.dir>0?18.4-car.len/2:25.6+car.len/2,toLine=car.dir*(line-car.x);
+    if((!carsGo||onRoad)&&toLine>=-0.05)step=Math.min(step,Math.max(0,toLine));
+    for(const o of f.cars){if(o===car||o.z!==car.z)continue;const gap=(((o.x-car.x)*car.dir)%ROAD_LEN+ROAD_LEN)%ROAD_LEN-(car.len+o.len)/2-1.5;
+      if(gap<ROAD_LEN/2)step=Math.min(step,Math.max(0,gap));}
+    if(car.bus&&!car.stopped){const to=car.dir*(BUS_STOP-car.x);if(to>=0&&to<=step){step=to;car.stopped=true;car.wait=3.5;}}
+    car.x+=car.dir*step;
+    if(car.x>ROAD_FROM+ROAD_LEN){car.x-=ROAD_LEN;car.stopped=false;}if(car.x<ROAD_FROM){car.x+=ROAD_LEN;car.stopped=false;}
+    car.g.position.x=car.x;
+  }
+  for(const p of f.people){
+    const dx=p.b[0]-p.a[0],dz=p.b[1]-p.a[1],len=Math.hypot(dx,dz),px=p.g.position.x,pz=p.g.position.z;
+    const near=Math.hypot(P.x-px,P.z-pz)<1.7;
+    if(near){p.g.rotation.y=Math.atan2(P.x-px,P.z-pz);if(!p.said){p.said=true;say('hello'+(p.step%3),'',2);}}
+    else{p.said=false;p.t+=(p.back?-1:1)*p.speed*dt/len;if(p.t>=1){p.t=1;p.back=true;}if(p.t<=0){p.t=0;p.back=false;}
+      p.g.position.set(p.a[0]+dx*p.t,0,p.a[1]+dz*p.t);p.g.rotation.y=Math.atan2(dx,dz)+(p.back?Math.PI:0);}
+    const sw=near?0:Math.sin(f.time*p.speed*6+p.step)*0.55;
+    p.legs[0].rotation.x=sw;p.legs[1].rotation.x=-sw;p.arms[0].rotation.x=Math.PI/2-sw*0.8;p.arms[1].rotation.x=Math.PI/2+sw*0.8;
+  }
+}
+const atSchoolDoor=()=>F.schoolOpen>=1&&P.z<-60.9-LONG&&Math.abs(P.x-SCHOOL_DOOR)<1.5;
+function updateSchoolDoor(dt){if(!(F.schoolOpen>0&&F.schoolOpen<1))return;
+  F.schoolOpen=Math.min(1,F.schoolOpen+dt*1.8);F.schoolDoors.forEach(d=>d.g.rotation.y=d.k*F.schoolOpen*1.75);}
+
+/* ====================== УТРО: маленькая квартира и улица до школы (пролог) ====================== */
+const DOOR_X=6;                 // выход из подъезда на улицу
+const UP=30,RIDE=5.5;           // 20 этаж лежит на z+30; сколько секунд едет лифт
+function mat2(key,w,h,draw,rx,ry){return texCache[key]||(texCache[key]=new THREE.MeshLambertMaterial({map:canvasTex(w,h,draw,rx,ry)}));}
+function paper(c){return [c[0],c[1]];}
+function soft3(w,h,d,color,x,y,z,r){return part(w,h,d,color,x,y,z,target,0.012,r);}
+function cityView(){return texCache.city||(texCache.city=flat({map:canvasTex(1024,512,(g,w,h)=>{   // вид с 20 этажа: небо, море, мост и крыши далеко внизу
+  const s=g.createLinearGradient(0,0,0,230);s.addColorStop(0,'#6fb2f0');s.addColorStop(1,'#ffe8d0');g.fillStyle=s;g.fillRect(0,0,w,230);
+  g.fillStyle='#fff3c0';g.beginPath();g.arc(820,90,38,0,7);g.fill();
+  for(let i=0;i<10;i++){const x=drand()*w,y=30+drand()*90;g.fillStyle='rgba(255,255,255,.75)';for(let k=0;k<6;k++){g.beginPath();g.ellipse(x+k*16,y+(drand()-0.5)*10,24,12,0,0,7);g.fill();}}
+  g.fillStyle='#8aa4c4';g.beginPath();g.moveTo(0,230);[[110,170],[240,212],[330,184],[470,224]].forEach(q=>g.lineTo(q[0],q[1]));g.lineTo(470,230);g.fill();
+  const sea=g.createLinearGradient(0,230,0,330);sea.addColorStop(0,'#7cc0e8');sea.addColorStop(1,'#2f74b0');g.fillStyle=sea;g.fillRect(0,230,w,110);
+  for(let i=0;i<200;i++){g.fillStyle='rgba(255,255,255,'+drand()*0.45+')';g.fillRect(drand()*w,235+drand()*95,8+drand()*20,2);}
+  g.strokeStyle='#f2f4fa';g.lineWidth=5;g.beginPath();g.moveTo(360,262);g.lineTo(1000,262);g.stroke();[520,780].forEach(x=>{g.fillStyle='#f2f4fa';g.fillRect(x,186,12,90);
+    g.lineWidth=2;for(let k=-5;k<6;k++){g.beginPath();g.moveTo(x+6,190);g.lineTo(x+6+k*24,262);g.stroke();}});
+  for(let row=0;row<6;row++)for(let x=-20;x<w;x+=30+drand()*20){const bw=24+drand()*26,bh=18+drand()*(24+row*8),y=330+row*34;
+    g.fillStyle=['#e8d4b8','#c8d4e4','#e4b4a4','#b8d0b4','#d8c8e4'][Math.floor(drand()*5)];g.fillRect(x,y-bh,bw,bh+40);g.fillStyle='rgba(60,70,110,.5)';
+    for(let yy=y-bh+5;yy<y+20;yy+=9)for(let xx=x+4;xx<x+bw-5;xx+=8)g.fillRect(xx,yy,4,5);g.fillStyle='rgba(40,30,60,.3)';g.fillRect(x+bw-5,y-bh,5,bh+40);g.fillStyle='#8a6a66';g.fillRect(x,y-bh-3,bw,4);}
+})}));}
+function liftSide(f,dz){   // одна остановка лифта: кабина, рама, две створки и табло
+  const z0=3+dz,inner=mat2('liftIn',256,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,0);gr.addColorStop(0,'#9aa2b0');gr.addColorStop(0.3,'#e6eaf2');gr.addColorStop(0.6,'#aab2c0');gr.addColorStop(1,'#dde2ea');g.fillStyle=gr;g.fillRect(0,0,w,h);
+    g.fillStyle='rgba(255,255,255,.18)';for(let x=0;x<w;x+=5)g.fillRect(x,0,1,h);g.strokeStyle='#5a6070';g.lineWidth=5;g.strokeRect(3,3,w-6,h-6);g.fillStyle='#8a6a42';g.fillRect(0,150,w,14);});
+  floorPlane(-2.3,0,z0,z0+2,'lift',tiles('#7a5a4a','#5e4438','#d8b878'));ceiling(-2.3,0,z0,z0+2,2.75);
+  wall(-2.6,-2.3,z0-0.2,z0+2.2,['#b8bfcc','#9aa2b0']);wall(-2.3,-0.3,z0-0.3,z0,['#b8bfcc','#9aa2b0']);wall(-2.3,-0.3,z0+2,z0+2.3,['#b8bfcc','#9aa2b0']);
+  plane(2,2.75,inner,-2.29,1.375,z0+1,Math.PI/2);plane(2,2.75,inner,-1.3,1.375,z0+0.01,0);plane(2,2.75,inner,-1.3,1.375,z0+1.99,Math.PI);
+  box(0.12,0.08,1.8,0xd8b878,-2.2,1.0,z0+1);box(1.2,0.04,1.2,flat({color:0xfffbe6}),-1.15,2.73,z0+1);f.lamps.push([-1.15,2.4,z0+1]);
+  box(0.3,ROOM_H-2.5,2,0xd8ccb4,-0.15,2.5+(ROOM_H-2.5)/2,z0+1);[z0-0.08,z0+2.08].forEach(z=>edged(box(0.42,2.55,0.16,0x8c929e,-0.12,1.275,z)));edged(box(0.42,0.14,2.32,0x8c929e,-0.12,2.57,z0+1));
+  const panels=[0,1].map(i=>{const m=edged(box(0.09,2.5,1.0,mat2('liftDoor',128,320,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,0);gr.addColorStop(0,'#8a929e');gr.addColorStop(0.45,'#f0f3f8');gr.addColorStop(1,'#98a0ac');g.fillStyle=gr;g.fillRect(0,0,w,h);
+      g.fillStyle='rgba(60,70,90,.18)';for(let x=0;x<w;x+=6)g.fillRect(x,0,2,h);g.strokeStyle='#4a5060';g.lineWidth=7;g.strokeRect(3,3,w-6,h-6);g.fillStyle='#d8b878';g.fillRect(10,180,w-20,10);}),-0.16,1.25,z0+0.5+i));return m;});
+  const col=solid(-0.3,0,z0,z0+2,9);
+  const show=(x,y,z,ry,w,h)=>{label(w,h,192,96,x,y,z,ry,(g,W,H)=>{const l=F&&F.lift?F.lift:f.lift;g.fillStyle='#151820';g.fillRect(0,0,W,H);textFit(g,(l&&l.ride>0?'▼ ':'')+(l?l.floor:20),W/2,H/2+3,W-14,60,'#ff8a3c');});f.liftSigns.push(signs[signs.length-1]);};
+  show(0.07,2.9,z0+1,Math.PI/2,0.9,0.45);show(-2.27,2.3,z0+1,Math.PI/2,0.7,0.35);
+  edged(box(0.06,0.42,0.22,0xc8ccd8,0.04,1.2,z0+2.35));ball(0.05,flat({color:0xffb432}),0.09,1.26,z0+2.35);
+  edged(box(0.5,0.9,0.06,0xc8ccd8,-0.7,1.25,z0+1.97));for(let i=0;i<10;i++)ball(0.035,flat({color:i===0?0xffb432:0xf0f2f8}),-0.82+(i%2)*0.24,0.95+Math.floor(i/2)*0.15,z0+1.93);
+  return {panels,col,z0,amt:0};
+}
+function bathroom(f,z){   // ванная: раковина с зеркалом, туалет, ванна
+  const bw=['#e8f4fa','#b8d4e2'];
+  floorPlane(10.9,11.2,z+0.9,z+2.3,'bath',tiles('#dfeef4','#c8dde8','#9ab4c4'));floorPlane(11.2,14.4,z,z+3.4,'bath',tiles('#dfeef4','#c8dde8','#9ab4c4'));ceiling(11.2,14.4,z,z+3.4,3);
+  wall(11.2,14.7,z-0.3,z,bw);wall(11.2,14.7,z+3.4,z+3.7,bw);wall(14.4,14.7,z,z+3.4,bw);
+  soft3(0.95,0.82,0.5,0xf0f2f6,12.4,0.41,z+0.26,0.04);soft3(0.7,0.08,0.38,0xffffff,12.4,0.86,z+0.28,0.03);box(0.5,0.02,0.26,0x9ab4c4,12.4,0.905,z+0.3);
+  tube(0.025,0.025,0.25,0xc8ccd8,12.4,1.0,z+0.08);box(0.04,0.04,0.18,0xc8ccd8,12.4,1.12,z+0.16);
+  plane(0.8,0.9,flat({color:0xcfe6f2}),12.4,1.65,z+0.012,0);frame(12.4,1.65,z+0.05,0.8,0.9,0xf0f2f6);
+  tube(0.05,0.04,0.12,0x5a96d2,12.85,0.96,z+0.15);[0xe6506e,0x46a05a].forEach((c,i)=>box(0.015,0.16,0.015,c,12.84+i*0.03,1.05,z+0.15));
+  solid(11.92,12.88,z,z+0.52,0.9);
+  soft3(0.42,0.42,0.6,0xffffff,13.95,0.21,z+1.2,0.12);soft3(0.44,0.1,0.5,0xf0f2f6,13.95,0.45,z+1.17,0.06);soft3(0.4,0.6,0.2,0xffffff,14.18,0.6,z+1.2,0.05);
+  box(0.06,0.05,0.12,0xc8ccd8,14.06,0.85,z+1.05);solid(13.6,14.4,z+0.85,z+1.55,0.5);
+  soft3(2.6,0.58,0.82,0xffffff,12.95,0.29,z+2.95,0.1);box(2.3,0.02,0.6,0x8cd2ff,12.95,0.5,z+2.95);solid(11.65,14.4,z+2.53,z+3.4,0.6);
+  tube(0.02,0.02,1.4,0xc8ccd8,14.3,1.6,z+3.25);tube(0.1,0.12,0.04,0xc8ccd8,14.18,2.3,z+3.25);
+  [0,1,2].forEach(i=>soft3(0.12,0.5,0.06,[0x5a96d2,0xf0b4b4,0xf5d778][i],11.4+i*0.18,1.4,z+3.36,0.03));
+  box(0.9,0.05,0.4,flat({color:0xfffbe6}),12.8,2.97,z+1.7);f.lamps.push([12.8,2.5,z+1.7]);
+}
+function buildFlat(f){   // квартира на 20 этаже: комната с кроватью, гостиная, кухня, большое окно на город
+  const hw=['#fff0da','#ecd9bc'],hall=['#e8eef2','#c8d4dc'],z=UP-2;   // z — передняя (северная) стена
+  floorPlane(2.9,10.9,z,z+8,'flat',floorDraw('#c89a6a','#a87c50'));ceiling(2.9,10.9,z,z+8,3);
+  wall(2.9,10.9,z-0.3,z,hw);wall(2.9,10.9,z+8,z+8.3,hw);wall(10.9,11.2,z-0.3,z+0.9,hw);wall(10.9,11.2,z+2.3,z+8.3,hw);box(0.3,0.5,1.4,0xecd9bc,11.05,2.75,z+1.6);
+  [z+0.9,z+2.3].forEach(q=>soft3(0.4,2.5,0.1,0xb48a64,11.05,1.25,q,0.02));soft3(0.4,0.1,1.5,0xb48a64,11.05,2.5,z+1.6,0.02);
+  bathroom(f,z);
+  wall(2.6,2.9,z-0.3,z+1.6,hw);wall(2.6,2.9,z+3.2,z+8.3,hw);box(0.3,0.5,1.6,0xecd9bc,2.75,2.75,z+2.4);
+  f.flatDoor=edged(box(0.1,2.5,1.6,mat2('flatDoor',160,260,(g,w,h)=>{g.fillStyle='#5a6e86';g.fillRect(0,0,w,h);g.strokeStyle='#2a3446';g.lineWidth=8;g.strokeRect(4,4,w-8,h-8);g.lineWidth=4;g.strokeRect(20,20,w-40,90);g.strokeRect(20,130,w-40,110);g.fillStyle='#e6c85a';g.beginPath();g.arc(w-26,150,9,0,7);g.fill();g.fillStyle='#dfe6f0';g.fillRect(55,45,50,28);}),2.75,1.25,z+2.4));
+  f.flatCol=solid(2.6,2.9,z+1.6,z+3.2,9);
+  [z,z+8].forEach(q=>{box(8,0.1,0.05,0xa87c50,6.9,0.05,q+(q===z?0.03:-0.03));ao(6.9,q,8,q===z?'n':'s');});
+  // большое окно с видом, рама и шторы
+  plane(4.6,1.9,cityView(),7.2,1.65,z+0.012,0);frame(7.2,1.65,z+0.05,4.6,1.9,0xf5f0e6);[5.9,7.2,8.5].forEach(x=>box(0.06,1.9,0.06,0xf5f0e6,x,1.65,z+0.06));
+  [4.75,9.65].forEach(x=>{for(let i=0;i<4;i++)soft3(0.13,2.3,0.12+(i%2)*0.08,0x78b4a0,x+(x<7?-1:1)*i*0.12,1.5,z+0.14,0.05);});box(5.8,0.06,0.06,0x8a5a3c,7.2,2.72,z+0.18);
+  // низкий стол с корейским завтраком и подушками
+  shadow(6.4,z+1.9,2.2,1.6);soft3(1.5,0.09,0.95,0xa0643c,6.4,0.48,z+1.9,0.04);[[-0.62,-0.36],[0.62,-0.36],[-0.62,0.36],[0.62,0.36]].forEach(q=>tube(0.05,0.04,0.45,0x7a4a2a,6.4+q[0],0.23,z+1.9+q[1]));
+  solid(5.65,7.15,z+1.42,z+2.38,0.55);[[5.1,1.9,0xd2646e],[7.7,1.9,0x5a96d2],[6.4,3,0xe6b450]].forEach(c=>soft3(0.6,0.12,0.6,c[2],c[0],0.07,z+c[1],0.06));
+  f.food=new THREE.Group();target.add(f.food);const keep=target;target=f.food;const fz=z+1.9;
+  tube(0.14,0.09,0.12,0xf5f5f0,6.05,0.58,fz-0.12);const rice=ball(0.12,0xffffff,6.05,0.63,fz-0.12);rice.scale.y=0.55;
+  tube(0.17,0.11,0.1,0x3c78c8,6.42,0.57,fz-0.16);tube(0.15,0.15,0.012,0xe6a03c,6.42,0.62,fz-0.16);[0,1,2].forEach(i=>ball(0.025,0x46a05a,6.37+i*0.05,0.63,fz-0.16+i%2*0.04));
+  tube(0.15,0.15,0.025,0xf5f5f0,6.82,0.54,fz-0.08);[[-0.05,0],[0.05,0.04],[0.01,-0.05]].forEach(q=>box(0.08,0.045,0.055,0xd23c28,6.82+q[0],0.57,fz-0.08+q[1]));
+  tube(0.14,0.14,0.02,0xf5f5f0,6.4,0.54,fz+0.2);tube(0.1,0.1,0.02,0xfffbe8,6.4,0.555,fz+0.2);ball(0.045,0xffb428,6.4,0.57,fz+0.2);
+  [0,0.05].forEach(d=>box(0.012,0.012,0.36,0xc8ccd8,5.82+d,0.54,fz+0.15));tube(0.065,0.055,0.18,0xffa028,6.95,0.62,fz+0.24);target=keep;
+  // кровать
+  shadow(9.7,z+6.7,2.6,3);soft3(2.1,0.4,2.4,0x8a5a3c,9.8,0.22,z+6.7,0.06);soft3(2.0,0.26,2.3,0xffffff,9.8,0.52,z+6.7,0.1);soft3(2.05,0.18,1.6,0x4f7ad8,9.8,0.68,z+6.35,0.09);
+  soft3(0.9,0.2,0.5,0xfff6e0,9.35,0.74,z+7.5,0.1);soft3(0.8,0.2,0.46,0xffd2dc,10.35,0.74,z+7.5,0.1);soft3(2.2,1.2,0.14,0x7a4a2a,9.8,0.65,z+7.92,0.06);solid(8.75,10.9,z+5.5,z+8,0.8);
+  ball(0.17,0xc89664,10.2,0.92,z+6.9);tube(0.035,0.03,0.42,0xc89664,10.2,0.86,z+7.18).rotation.x=1.2;   // кот Наби спит на кровати
+  [-0.11,0.11].forEach(d=>ball(0.065,0xc89664,10.2+d,1.08,z+6.9));[-0.05,0.05].forEach(d=>ball(0.02,0x1e1e28,10.2+d,0.95,z+6.74));
+  // диван и телевизор
+  shadow(5.2,z+7.2,2.8,1.4);soft3(2.4,0.45,0.95,0x46a08c,5.2,0.35,z+7.35,0.16);soft3(2.4,0.75,0.3,0x3c8c78,5.2,0.78,z+7.82,0.13);[-1.25,1.25].forEach(d=>soft3(0.28,0.66,0.95,0x3c8c78,5.2+d,0.5,z+7.35,0.12));
+  [-0.57,0.57].forEach(d=>soft3(1.08,0.18,0.8,0x58bea6,5.2+d,0.64,z+7.28,0.08));soft3(0.5,0.42,0.16,0xf5d778,4.55,0.9,z+7.62,0.07);solid(3.8,6.6,z+6.85,z+8,0.7);
+  soft3(0.55,0.5,2.2,0xd8b88c,10.55,0.27,z+3.9,0.05);soft3(0.1,1.1,1.9,0x14161e,10.72,1.15,z+3.9,0.03);
+  f.tv=plane(1.78,0.98,flat({map:canvasTex(256,144,(g,w,h)=>{g.fillStyle='#2a5aa8';g.fillRect(0,0,w,h);g.fillStyle='#fff';g.fillRect(0,106,w,38);textFit(g,'부산 뉴스',64,125,110,24,'#c8283c');textFit(g,'☀ 18°',200,125,90,24,'#1e1e28');
+    g.fillStyle='#ffdcc0';g.beginPath();g.arc(70,60,24,0,7);g.fill();g.fillStyle='#2a1810';g.fillRect(44,30,52,16);g.fillStyle='#373755';g.fillRect(40,84,62,22);g.fillStyle='#ffe678';g.beginPath();g.arc(190,52,28,0,7);g.fill();})}),10.66,1.15,z+3.9,-Math.PI/2);
+  solid(10.25,10.9,z+2.8,z+5,0.55);
+  // кухня и холодильник с запиской бабушки
+  shadow(4.1,z+0.5,2.4,1.1);soft3(1.8,0.9,0.66,0x8cb4c8,3.95,0.46,z+0.36,0.03);soft3(1.86,0.07,0.72,0xf5eee0,3.95,0.94,z+0.37,0.02);[3.5,4.0,4.5].forEach(x=>{box(0.4,0.7,0.02,0x7aa4ba,x,0.46,z+0.7);box(0.05,0.2,0.04,0xe8ecf4,x+0.12,0.62,z+0.73);});
+  tube(0.18,0.18,0.22,0xd23c46,4.35,1.12,z+0.36,target,0.012);box(0.62,0.025,0.42,0x7a8a96,3.45,0.965,z+0.38);tube(0.025,0.025,0.3,0xc8ccd8,3.45,1.1,z+0.12);box(0.04,0.04,0.2,0xc8ccd8,3.45,1.24,z+0.21);
+  f.rack=new THREE.Group();target.add(f.rack);f.rack.visible=false;{const keep=target;target=f.rack;[0,1,2].forEach(i=>tube(0.15,0.15,0.025,0xf5f5f0,3.0,1.0+i*0.04,z+0.4));tube(0.13,0.09,0.11,0x3c78c8,3.02,1.18,z+0.4);target=keep;}
+  tube(0.21,0.21,0.04,0x2a2a38,4.35,0.99,z+0.36);soft3(1.8,0.6,0.34,0xf5eee0,3.95,2.25,z+0.19,0.03);solid(2.9,4.9,z,z+0.72,0.97);
+  soft3(0.75,2.05,0.8,0xf0f3f8,3.3,1.03,z+4.4,0.09);box(0.04,0.55,0.05,0x8c92a0,3.72,1.35,z+4.12);box(0.02,0.03,0.78,0xb4bac8,3.68,0.92,z+4.4);solid(2.9,3.72,z+3.98,z+4.82,2.1);
+  label(0.5,0.38,220,170,3.71,1.55,z+4.55,Math.PI/2,(g,W,H)=>{g.fillStyle='#fff6a8';g.fillRect(0,0,W,H);textFit(g,tr('note1'),W/2,H*0.35,W-16,28,'#1e1e28');textFit(g,tr('note2'),W/2,H*0.72,W-16,28,'#c8283c');});
+  // шкаф, коврик, растения, фото, рюкзак, обувь, люстры
+  soft3(1.6,2.3,0.65,0xe8d4b0,7.5,1.16,z+7.65,0.05);box(0.03,2.1,0.02,0x8a6a48,7.5,1.16,z+7.31);[-0.1,0.1].forEach(d=>box(0.04,0.3,0.04,0x6e4a32,7.5+d,1.2,z+7.3));solid(6.7,8.3,z+7.3,z+8,2.3);
+  soft3(2.6,0.02,1.9,0xb4646e,7.6,0.012,z+4.2,0.008);soft3(2.1,0.024,1.4,0xd8a878,7.6,0.015,z+4.2,0.008);
+  [[10.45,z+0.55],[3.25,z+7.5]].forEach(p=>{tube(0.24,0.17,0.42,0xc8704a,p[0],0.21,p[1],target,0.012);[[0,0.75,0,0.27],[-0.17,0.95,0.05,0.19],[0.16,1.05,-0.05,0.2],[0,1.25,0,0.14]].forEach((b,i)=>ball(b[3],i%2?0x3c8c50:0x5ab45f,p[0]+b[0],b[1],p[1]+b[2]));solid(p[0]-0.26,p[0]+0.26,p[1]-0.26,p[1]+0.26,1);});
+  [[10.88,6.0,1.9],[10.88,6.9,1.65]].forEach(([x,dz,y],i)=>{soft3(0.05,0.5,0.62,0x6e4a32,x,y,z+dz,0.015);plane(0.5,0.38,mat2('photo'+i,128,96,(g,w,h)=>{g.fillStyle=i?'#bfe4ff':'#ffd8c0';g.fillRect(0,0,w,h);g.fillStyle=i?'#4c9c54':'#c8703c';g.fillRect(0,66,w,30);
+    [[44,i?'#d23c46':'#5a96d2'],[84,'#e66e8c']].forEach(q=>{g.fillStyle='#ffdcc0';g.beginPath();g.arc(q[0],44,13,0,7);g.fill();g.fillStyle=q[1];g.fillRect(q[0]-13,56,26,26);g.fillStyle='#2a1810';g.fillRect(q[0]-14,28,28,9);});}),x-0.04,y,z+dz,-Math.PI/2);});
+  f.bag=new THREE.Group();target.add(f.bag);{const keep=target;target=f.bag;soft3(0.4,0.55,0.34,0xd23c46,8.4,0.29,z+7.0,0.13);soft3(0.28,0.22,0.06,0xf5f5f0,8.4,0.22,z+6.8,0.025);target=keep;}
+  soft3(0.35,0.5,1.0,0xd8b88c,3.1,0.25,z+6.0,0.04);[5.7,6.05,6.35].forEach((q,i)=>soft3(0.26,0.1,0.14,[0x3c78c8,0xf5f5f0,0x2a2a38][i],3.12,0.56,z+q,0.04));
+  clockFace(2.92,2.3,z+4.4+1.2,Math.PI/2);
+  [[5,2.6],[8.6,5.4]].forEach(p=>{tube(0.5,0.62,0.12,flat({color:0xfff6dc}),p[0],2.9,z+p[1]);f.lamps.push([p[0],2.5,z+p[1]]);});
+  // площадка 20 этажа перед лифтом
+  floorPlane(0,2.6,z,z+8,'hall20',tiles('#e4e0d8','#d2cec6','#a8a49c'));ceiling(0,2.6,z,z+8,ROOM_H);
+  wall(0,2.6,z-0.3,z,hall);wall(0,2.6,z+8,z+8.3,hall);wall(-0.3,0,z-0.3,3+UP,hall);wall(-0.3,0,5+UP,z+8.3,hall);
+  plane(1.8,1.5,cityView(),1.3,1.7,z+0.012,0);frame(1.3,1.7,z+0.05,1.8,1.5,0xf5f0e6);
+  label(0.7,0.5,140,100,0.02,2.1,z+3.4,Math.PI/2,(g,W,H)=>{g.fillStyle='#2c4a9e';g.fillRect(0,0,W,H);textFit(g,'20층',W/2,H/2+3,W-14,48,'#ffffff');});
+  label(0.7,0.28,200,80,2.58,2.2,z+4.2,-Math.PI/2,(g,W,H)=>{g.fillStyle='#f5f5f0';g.fillRect(0,0,W,H);textFit(g,'2001',W/2,H/2+3,W-14,46,'#1e1e28');});
+  soft3(0.3,0.75,0.2,0xd22d37,2.4,0.55,z+7.4,0.08);f.lamps.push([1.3,2.9,z+2],[1.3,2.9,z+6]);
+}
+function buildLobby(f){   // первый этаж подъезда: мрамор, почтовые ящики, консьерж, стеклянная дверь
+  const hw=['#f2ece0','#d8ccb8'];
+  floorPlane(0,DOOR_X+0.3,1.5,6.5,'lobby',tiles('#e8e0d0','#cfc4b0','#a89a84'));ceiling(0,DOOR_X,1.5,6.5,3);
+  wall(-0.3,0,1.2,3,hw);wall(-0.3,0,5,6.8,hw);wall(0,DOOR_X,1.2,1.5,hw);wall(0,DOOR_X,6.5,6.8,hw);wall(DOOR_X,DOOR_X+0.3,1.2,3.2,hw);wall(DOOR_X,DOOR_X+0.3,4.8,6.8,hw);
+  box(0.3,0.4,1.6,0xd8ccb8,DOOR_X+0.15,2.8,4);
+  f.door=edged(box(0.1,2.6,1.6,new THREE.MeshLambertMaterial({color:0xa8e0ff,transparent:true,opacity:0.5}),DOOR_X+0.15,1.3,4));[-0.76,0,0.76].forEach(d=>box(0.13,2.6,0.07,0x50586e,0,0,d,f.door));box(0.14,0.08,0.4,0xd8dce6,0,-0.1,0.2,f.door);
+  f.doorCol=solid(DOOR_X,DOOR_X+0.3,3.2,4.8,9);
+  for(let i=0;i<6;i++)for(let j=0;j<3;j++){soft3(0.4,0.3,0.1,0x9aa6ba,1.1+i*0.43,0.9+j*0.34,1.56,0.02);box(0.22,0.025,0.02,0x2a2a38,1.1+i*0.43,0.96+j*0.34,1.62);}
+  soft3(1.7,0.95,0.6,0x965f32,3.4,0.48,6.1,0.05);soft3(1.8,0.07,0.72,0xf0e4d0,3.4,0.98,6.08,0.02);solid(2.5,4.3,5.72,6.5,1);
+  soft3(0.5,0.34,0.07,0x20242e,3.0,1.2,6.15,0.02);const gd=makePerson('grandpa',{shirt:0x2c4a9e,sleeve:0x2c4a9e,farSleeve:0x1e3270},'').g;gd.position.set(4.75,0,5.45);gd.rotation.y=Math.PI;
+  label(1.5,0.45,300,90,0.02,2.95,2.3,Math.PI/2,(g,W,H)=>{g.fillStyle='#2c4a9e';g.fillRect(0,0,W,H);textFit(g,'달빛 아파트 · 1층',W/2,H/2+3,W-14,40,'#ffffff');});
+  [[5.5,1.9],[0.5,6.05]].forEach(p=>{tube(0.22,0.16,0.4,0x50586e,p[0],0.2,p[1]);[[0,0.72,0.26],[0.12,0.98,0.18],[-0.1,1.1,0.15]].forEach((b,i)=>ball(b[2],i%2?0x3c8c50:0x5ab45f,p[0]+b[0],b[1],p[1]));solid(p[0]-0.24,p[0]+0.24,p[1]-0.24,p[1]+0.24,1);});
+  [[1.8,4],[4.4,4]].forEach(p=>{box(0.9,0.05,0.5,flat({color:0xfffbe6}),p[0],2.97,p[1]);f.lamps.push([p[0],2.5,p[1]]);});
+  // высотка снаружи
+  const tw=facadeTex(0xd8a888,3,11);
+  box(8.6,21,6.6,0xd8a888,2.0,13.6,4);plane(6.6,21,tw,6.32,13.6,4,Math.PI/2);plane(8.6,21,tw,2,13.6,0.69,Math.PI);plane(8.6,21,tw,2,13.6,7.31,0);
+  box(0.5,0.16,3.4,0xe8dcc8,6.55,3.0,4);[2.45,5.55].forEach(q=>tube(0.09,0.09,3,0xe8dcc8,6.65,1.5,q));
+  [1.2,6.8].forEach(q=>box(0.04,3.1,1.0,0xb88a70,DOOR_X+0.32,1.55,q+(q<4?-0.0:0)));
+  solid(-0.3,DOOR_X+0.34,0,1.2,9);solid(-0.3,DOOR_X+0.34,6.8,8,9);[0.6,7.4].forEach(z=>[6.9,5.8].forEach(x=>ball(0.45,0x55aa5a,x,0.3,z)));
+}
+function buildHome(){
+  const f={n:0,home:true,ate:false,jobs:{},flatOpen:false,out:false,group:new THREE.Group(),colliders:[],doors:[],rooms:[],enemies:[],pickups:[],deco:[],lamps:[],lidTop:[],lidBottom:[],wells:{},len:TOWN.x1,liftSigns:[]};
+  building=f;target=f.group;softBuild=true;
+  f.lift={floor:20,at:'up',open:false,ride:0,stops:[]};
+  f.lift.stops=[Object.assign(liftSide(f,UP),{at:'up'}),Object.assign(liftSide(f,0),{at:'low'})];
+  buildFlat(f);buildLobby(f);buildDistrict(f);
+  softBuild=false;target=scene;building=null;
+  return f;
+}
+function updateLift(dt){
+  const f=F,l=f.lift;
+  for(const s of l.stops){const want=l.open&&l.at===s.at&&l.ride<=0;s.amt=Math.max(0,Math.min(1,s.amt+(want?1:-1)*dt*1.5));
+    s.panels[0].position.z=s.z0+0.5-s.amt*0.94;s.panels[1].position.z=s.z0+1.5+s.amt*0.94;s.col.off=s.amt>0.75;}
+  if(l.ride>0){l.ride-=dt;const k=Math.max(0,Math.min(1,(l.ride-0.4)/(RIDE-1.4))),n=Math.max(1,Math.round(1+19*k));
+    if(n!==l.floor){l.floor=n;SND.step();}
+    if(l.ride<RIDE-0.9&&l.ride>0.4)S.shake=Math.max(S.shake,0.04);
+    if(l.ride<=0){P.z-=UP;l.at='low';l.floor=1;l.open=true;SND.door();say('liftDone','',3);}
+    f.liftSigns.forEach(drawSign);}
+}
+function goHome(){   // игра начинается дома
+  floors.forEach(f=>{if(f)scene.remove(f.group);});
+  HOME=buildHome();F=HOME;scene.add(F.group);colliders=F.colliders;enemies=F.enemies;pickups=F.pickups;
+}
+function leaveHome(){if(HOME){scene.remove(HOME.group);HOME=null;}}
+const inCabin=z0=>P.x<-0.35&&P.z>z0&&P.z<z0+2;
+/* ----- утро: дела дома и маленькие катсцены (просыпание, новости, завтрак) ----- */
+const JOBS=['wash','tv','eat','dishes','bag'];
+const jobsLeft=()=>JOBS.filter(k=>!F.jobs[k]);
+const morningDone=()=>!F.jobs||jobsLeft().length===0;
+const newsTex=canvasTex(256,144,(g,w,h)=>{g.fillStyle='#14204a';g.fillRect(0,0,w,h);g.fillStyle='#d22d37';g.fillRect(0,0,w,26);textFit(g,'속보 · BREAKING',w/2,14,w-20,18,'#fff');
+  g.fillStyle='#3a3a5a';g.fillRect(140,34,104,66);g.fillStyle='#e0bc90';g.fillRect(150,52,84,48);g.fillStyle='#e8d4b8';[160,184,208].forEach(x=>g.fillRect(x,60,14,12));g.fillStyle='#96e678';g.beginPath();g.arc(196,86,9,0,7);g.fill();
+  g.fillStyle='#ffdcc0';g.beginPath();g.arc(66,62,22,0,7);g.fill();g.fillStyle='#2a1810';g.fillRect(42,34,48,14);g.fillStyle='#373755';g.fillRect(38,84,58,22);
+  g.fillStyle='#fff';g.fillRect(0,108,w,36);textFit(g,'학교에서 이상한 소리?!',w/2,126,w-20,22,'#c8283c');});
+let hc=null;   // идёт домашняя катсцена: {keys:[[t,x,y,z,yaw,pitch]], lines:[[t0,t1,key]], evs:[[t,fn]], t, end}
+function homeCut(keys,lines,evs,end){
+  hc={keys,lines,evs:evs||[],t:0,end:end||(()=>{})};S.state='cut';
+  $('msg').textContent='';$('cine').classList.remove('hide');$('cineText').textContent='';$('cineSkip').textContent=tr('cutSkip');show(null);
+}
+function updateHC(dt){
+  const c=hc;c.t+=dt;const k=c.keys,last=k[k.length-1];
+  while(c.evs.length&&c.t>=c.evs[0][0])c.evs.shift()[1]();
+  let a=k[0],b=k[0];for(let i=1;i<k.length;i++){if(c.t<k[i][0]){a=k[i-1];b=k[i];break;}a=b=k[i];}
+  const u=b===a?1:Math.max(0,Math.min(1,(c.t-a[0])/(b[0]-a[0]))),s=u*u*(3-2*u),mix=i=>a[i]+(b[i]-a[i])*s;
+  let dy=b[4]-a[4];dy=Math.atan2(Math.sin(dy),Math.cos(dy));
+  Object.assign(P,{x:mix(1),y:mix(2),z:mix(3),yaw:a[4]+dy*s,pitch:mix(5),vy:0,bob:0});
+  const line=c.lines.find(l=>c.t>=l[0]&&c.t<l[1]);$('cineText').textContent=line?tr(line[2]):'';
+  updateParticles(dt);
+  if(c.t>=last[0])endHC();
+}
+function endHC(){
+  const c=hc;if(!c)return;hc=null;
+  c.evs.forEach(e=>e[1]());const l=c.keys[c.keys.length-1];Object.assign(P,{x:l[1],y:0,z:l[3],yaw:l[4],pitch:0,vy:0});
+  $('cine').classList.add('hide');keys.Space=false;S.state='play';show(null);c.end();
+}
+function wakeUp(){   // герой просыпается под будильник
+  const z=UP-2,bz=z+6.95;
+  homeCut([[0,9.8,-0.62,bz,0,1.25],[2.6,9.8,-0.62,bz,0.35,1.1],[4.3,9.8,-0.62,bz,-0.5,0.7],[5.8,9.4,-0.35,bz-0.6,0.9,0.1],[6.9,8.3,0,UP+3.6,1.35,0]],
+    [[0.3,2.6,'w1'],[2.6,4.5,'w2'],[4.5,6.9,'w3']],
+    [[0.2,()=>beep(880,0.12,'square',0.05)],[0.5,()=>beep(880,0.12,'square',0.05)],[0.9,()=>beep(880,0.12,'square',0.05)],[1.2,()=>beep(880,0.12,'square',0.05)],[1.7,()=>beep(660,0.18,'triangle',0.05,520)]],
+    ()=>say('goalMorning','',3));
+  S.blink=1;
+}
+function watchTV(){
+  const z=UP-2,ty=z+3.9,f=F,old=f.tv.material.map;
+  homeCut([[0,P.x,0,P.z,P.yaw,0],[0.9,8.4,-0.55,ty,-Math.PI/2,-0.05],[3.5,8.6,-0.55,ty,-Math.PI/2,-0.05],[8.4,8.6,-0.55,ty,-Math.PI/2,-0.05],[9.6,8.4,0,ty,-Math.PI/2,0]],
+    [[1,3.3,'tv1'],[3.3,5.6,'tv2'],[5.6,8,'tv3'],[8,9.6,'tv4']],
+    [[0.9,()=>{f.tv.material.map=newsTex;f.tv.material.needsUpdate=true;beep(520,0.15,'sine',0.04);}],[5.4,()=>SND.roar()],[9.4,()=>{f.tv.material.map=old;f.tv.material.needsUpdate=true;}]],
+    ()=>{f.jobs.tv=true;SND.pick();});
+}
+function washDishes(){
+  const z=UP-2,f=F;
+  homeCut([[0,P.x,0,P.z,P.yaw,0],[0.7,3.45,0,z+1.15,0,-0.85],[3.4,3.45,0,z+1.15,0,-0.85],[3.9,3.45,0,z+1.3,0,0]],
+    [[0.7,2.4,'d1'],[2.4,3.9,'d2']],
+    [0.9,1.3,1.7,2.1].map(t=>[t,()=>{burst(3.45,1.0,z+0.38,0xffffff,8);burst(3.45,1.05,z+0.38,0x8cd2ff,5);beep(900+Math.random()*300,0.08,'sine',0.02);}])
+      .concat([[2.4,()=>{f.rack.visible=true;SND.pick();}]]),
+    ()=>{f.carry=false;f.jobs.dishes=true;});
+}
+function eatBreakfast(){
+  const z=UP-2,f=F,dish=[soft(0xf5f5f0),soft(0x3c78c8),soft(0xc8ccd8)],parts=f.food.children.filter(m=>!dish.includes(m.material));
+  homeCut([[0,P.x,0,P.z,P.yaw,0],[0.9,6.4,-0.8,z+3.05,0,-0.62],[3.6,6.4,-0.8,z+3.05,0,-0.55],[4.3,6.4,0,z+3.1,0,0]],
+    [[0.9,3.6,'e1']],
+    parts.map((m,i)=>[1.1+i*2.2/parts.length,()=>{m.visible=false;if(i%3===0)SND.pick();}]),
+    ()=>{f.jobs.eat=true;f.ate=true;say('ate','',3);});
+}
+
+function homeSpot(){   // что сейчас можно сделать: завтрак, дверь квартиры, лифт, дверь подъезда
+  const l=F.lift;
+  const z=UP-2,near=[[!F.jobs.eat,6.4,UP-0.1,1.8,'eat','eatHint'],[!F.jobs.wash,12.4,z+0.95,1.0,'wash','washHint'],
+    [F.jobs.eat&&!F.carry&&!F.jobs.dishes,6.4,UP-0.1,1.8,'take','takeHint'],[F.carry,3.45,z+1.0,1.2,'sink','sinkHint'],[true,13.95,z+1.2,0.9,'toilet','toiletHint'],[!F.jobs.tv,9.4,z+3.9,1.5,'tv','tvHint'],
+    [!F.jobs.bag,8.4,z+6.6,1.3,'bag','bagHint'],[true,10.2,z+6.9,1.9,'cat','catHint'],[!F.flatOpen,2.75,UP+0.4,1.7,'flat','exitHint']]
+    .filter(q=>q[0]).map(q=>[Math.hypot(P.x-q[1],P.z-q[2])-q[3],q[4],q[5]]).filter(q=>q[0]<0).sort((a,b)=>a[0]-b[0])[0];
+  if(near)return {act:near[1],hint:near[2]};
+  if(l.ride<=0&&l.at==='up'){
+    if(!l.open&&P.x>-0.1&&P.x<2&&Math.abs(P.z-(UP+4))<1.8)return {act:'call',hint:'liftCall'};
+    if(l.open&&inCabin(UP+3))return {act:'press',hint:'liftPress'};}
+  if(!F.out&&l.at==='low'&&Math.hypot(P.x-DOOR_X,P.z-4)<1.5)return {act:'door',hint:'exitHint'};
+  const g=F.gang;
+  if(g&&g.stage==='ice'&&!g.have&&Math.hypot(P.x-(ICE.x+0.5),P.z-ICE.z)<1.7)return {act:'ice',hint:'iceHint'};
+  if(g&&g.stage==='ice'&&g.have&&P.z<GZ+5&&P.x>17&&P.x<27)return {act:'give',hint:'giveHint'};
+  if(F.out&&!F.schoolOpen&&Math.hypot(P.x-SCHOOL_DOOR,P.z+61+LONG)<2.4)return {act:'school',hint:'schoolHint'};
+  return null;
+}
+function homeUse(){
+  const s=homeSpot();if(!s)return;
+  if(s.act==='eat')eatBreakfast();
+  if(s.act==='tv')watchTV();
+  if(s.act==='ice'){F.gang.have=true;SND.pick();say('gotIce','',3);}
+  if(s.act==='give')giveGang();
+  if(s.act==='take'){F.carry=true;F.food.visible=false;SND.pick();say('carry','',3);}
+  if(s.act==='sink')washDishes();
+  if(s.act==='toilet'){beep(300,0.6,'sawtooth',0.03,60);say('flushed','',1.5);}
+  if(s.act==='wash'){F.jobs.wash=true;burst(12.4,1.05,UP-1.65,0x8cd2ff,16);SND.pick();say('washed','',3);}
+  if(s.act==='bag'){F.jobs.bag=true;F.bag.visible=false;SND.pick();say('bagged','',3);}
+  if(s.act==='cat'){burst(10.2,1.2,UP+4.9,0xff96c8,10);beep(620,0.3,'sine',0.05,900);say('meow','',2.5);}
+  if(s.act==='flat'){if(!morningDone())say('jobsFirst','',3),$('msg').textContent+=jobsLeft().map(k=>tr('job_'+k)).join(', ');
+    else{F.flatOpen=true;F.flatDoor.visible=false;F.flatCol.off=true;SND.door();say('bye','',3);}}
+  if(s.act==='call'){F.lift.open=true;SND.door();say('liftCame','',2.5);}
+  if(s.act==='press'){F.lift.open=false;F.lift.ride=RIDE;SND.door();say('liftGo','',3);}
+  if(s.act==='school'){F.schoolOpen=0.01;F.schoolCol.off=true;SND.door();}
+  if(s.act==='door'){F.out=true;F.door.visible=false;F.doorCol.off=true;SND.door();say('goalSchool','',3);}
+}
+function enterSchool(){   // дошли до школы: сначала катсцена, потом первый этаж
+  goFloor(1);S.floorSeen=1;S.lastRoom=null;startCut();quest('floor',1,{floor:1});
+}
+/* ====================== КАТСЦЕНА: зомби прыгают на всех у центральной лестницы ====================== */
+let cut=null;
+function startCut(){
+  const st=mainStair(),mid=(st.x0+st.x1)/2,g=new THREE.Group();F.group.add(g);
+  F.enemies.forEach(e=>F.group.remove(e.m.g));   // настоящих зомби на время сцены убираем
+  const prev=target;target=g;
+  const kids=[['pupil',null,'bag',-2.6,1.5],['woman',null,'',-1.0,2.7],['pupil',{top:0x4a2a18},'bag',0.7,1.2],['pupil',null,'',2.5,2.4],['man',{shirt:0x46a05a,sleeve:0x46a05a,farSleeve:0x2f7040},'',-3.1,3.6]]
+    .map(([kind,over,extra,dx,z],i)=>{const m=makePerson(kind,over,extra),ry=i%2?-1.1:1.1;m.g.rotation.order='YXZ';m.g.position.set(mid+dx,0,z);m.g.rotation.y=ry;
+      return Object.assign(m,{x:mid+dx,z,ry,down:0,i});});
+  target=prev;
+  // откуда прыгают: [вид, x от середины, y, z, когда, на кого]
+  const zombies=[['zombie',-1.3,0.6,-3.6,4.0,0],['zombie',-0.5,0.8,-4.1,4.5,2],['tall',-1.7,0.5,-3.3,5.0,1],['zombie',9,0,3.0,5.5,3],['zombie',-9,0,4.2,6.0,4]]
+    .map(([kind,dx,y,z,t0,k])=>{const m=makeModel(kind);m.g.rotation.order='YXZ';m.g.visible=false;g.add(m.g);return {m,x:mid+dx,y,z,t0,kid:kids[k],hit:false};});
+  const last=makeModel('zombie');last.g.rotation.order='YXZ';last.g.visible=false;g.add(last.g);
+  cut={t:0,g,mid,kids,zombies,last,cue:0};
+  Object.assign(P,{x:mid,y:0,z:6.6,yaw:0,pitch:-0.07});
+  S.state='cut';S.fade=1;S.shake=0;$('fade').textContent='';$('msg').textContent='';$('cine').classList.remove('hide');$('cineText').textContent='';$('cineSkip').textContent=tr('cutSkip');show(null);
+}
+function updateCut(dt){
+  const c=cut;if(!c)return;c.t+=dt;const t=c.t,k01=v=>Math.max(0,Math.min(1,v));
+  const cues=[[2.4,SND.step],[3.2,SND.step],[3.9,SND.roar],[7.5,SND.roar]];
+  while(c.cue<cues.length&&t>=cues[c.cue][0]){cues[c.cue][1]();c.cue++;}
+  P.x=c.mid;P.z=6.6-k01(t/7.5)*1.3;P.yaw=t<2.4?Math.sin(t*1.1)*0.1:0;P.pitch=-0.07;
+  for(const k of c.kids){
+    if(k.down>0){k.down=Math.min(1,k.down+dt*3.5);k.g.rotation.x=-k.down*1.45;k.g.position.y=k.down*0.18;continue;}
+    const scared=k01((t-2.5-k.i*0.12)*3),look=Math.atan2(c.mid-0.8-k.x,-3.5-k.z);
+    const turn=Math.atan2(Math.sin(look-k.ry),Math.cos(look-k.ry));k.g.rotation.y=k.ry+turn*scared;
+    const sw=Math.sin(t*(scared?17:2.5)+k.i*2)*(scared?0.18:0.1);
+    k.arms[0].rotation.x=Math.PI/2-sw-scared*1.5;k.arms[1].rotation.x=Math.PI/2+sw-scared*1.5;
+    k.g.position.y=scared?0:Math.abs(Math.sin(t*3+k.i))*0.025;
+  }
+  for(const z of c.zombies){
+    if(t<z.t0-0.9)continue;z.m.g.visible=true;
+    const u=k01((t-z.t0)/0.75),tx=z.kid.x+(z.x<z.kid.x?-0.35:0.35),tz=z.kid.z-0.15;
+    z.m.g.position.set(z.x+(tx-z.x)*u,z.y*(1-u)+Math.sin(u*Math.PI)*1.7+(u>=1?Math.abs(Math.sin(t*9+z.t0*5))*0.12:0),z.z+(tz-z.z)*u);
+    z.m.g.rotation.y=Math.atan2(tx-z.x,tz-z.z);z.m.g.rotation.x=u>=1?0.35+Math.sin(t*11+z.t0)*0.12:Math.sin(u*Math.PI)*0.55;
+    if(u>=1&&!z.hit){z.hit=true;z.kid.down=0.01;burst(z.kid.x,1.1,z.kid.z,0xffe14a,12);S.shake=0.3;SND.hit();}
+  }
+  if(t>=7.5){const u=k01((t-7.5)/0.9),m=c.last.g;m.visible=true;   // последний прыгает прямо на героя
+    const sx=c.mid-0.7,sz=-2.9;m.position.set(sx+(P.x-sx)*u,0.5*(1-u)+Math.sin(u*Math.PI)*1.1-0.1*u,sz+(P.z-0.8-sz)*u);
+    m.rotation.y=Math.atan2(P.x-sx,P.z-sz);m.rotation.x=u*0.15;if(u>0.8)S.shake=0.35;}
+  updateParticles(dt);
+  $('cineText').textContent=t<2.4?tr('cut1'):t<4?tr('cut2'):t<7.5?tr('cut3'):'';
+  $('cine').style.background=t>2.4&&t<7.5?'rgba(190,10,30,'+(0.04+0.08*Math.abs(Math.sin(t*5))).toFixed(3)+')':'transparent';
+  if(t>8.2)S.fade=k01((t-8.2)*1.6);
+  if(t>=9.1)endCut();
+}
+function endCut(){   // игра начинается у центральной лестницы
+  const c=cut;if(!c)return;cut=null;
+  F.group.remove(c.g);c.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});
+  F.enemies.forEach(e=>{F.group.add(e.m.g);   // ближних отодвигаем, чтобы не кусали с первой секунды
+    if(!e.home&&Math.abs(e.x-c.mid)<10){e.x=e.hx=c.mid+(e.x<c.mid?-12:12);e.m.g.position.x=e.x;}});
+  $('cine').classList.add('hide');keys.Space=false;
+  place(c.mid,-0.7,Math.PI);P.inv=2.5;S.shake=0;S.lastRoom=null;S.state='play';S.fade=1;$('fade').textContent=tr('floor',1);show(null);
+  say(S.hasKey?'goalOffice':'goalKey','',4);
+}
+function skipCut(){if(hc){if(hc.t>0.6)endHC();return;}if(cut&&cut.t>0.8)endCut();}
 
 /* ----- лестницы настоящие: по ним поднимаются ногами -----
    u — расстояние от этажа вглубь лестницы, v — вбок от середины (v<0 — половина «вверх», v>0 — «вниз»).
@@ -908,6 +1585,7 @@ function buildFloor(n){
   return f;
 }
 function goFloor(n){
+  leaveHome();
   floors.forEach(f=>{if(f)scene.remove(f.group);});
   [n,n-1,n+1].forEach(k=>{if(k>=1&&k<=PLAN.length&&!floors[k])floors[k]=buildFloor(k);});
   F=floors[n];[n-1,n,n+1].forEach(k=>{if(floors[k])scene.add(floors[k].group);});
@@ -918,6 +1596,7 @@ function goFloor(n){
 function mainStair(f){return (f||F).rooms.find(r=>r.type==='stairs');}
 /* где точка на лестнице (или null): id — какая лестница, u — вглубь, v — вбок */
 function stairAt(x,z){
+  if(F.home)return null;
   if(z>0){if(x<-SIDE.u0)return {id:'w',u:-x,v:z-CORR/2,s:SIDE};
     if(x>F.len+SIDE.u0)return {id:'e',u:x-F.len,v:z-CORR/2,s:SIDE};return null;}
   const m=mainStair();
@@ -949,7 +1628,8 @@ function sameSpace(ax,az,bx,bz){   // можно ли достать друг д
   for(const d of F.doors)if(passable(d)&&Math.hypot(ax-d.x,az)<2.4&&Math.hypot(bx-d.x,bz)<2.4)return true;
   return false;
 }
-function insideSchool(x,z){return x>=-STAIR&&x<=F.len+STAIR&&z>=-DEPTH&&z<=CORR;}
+// дома: только район, подъезд и квартира, дальше пустое поле
+function insideSchool(x,z){if(F.home)return x>=-2.6&&x<=TOWN.x1&&z>=TOWN.z0&&(z<=9||(z>=UP-2.4&&z<=UP+6.4&&x<=14.5));return x>=-STAIR&&x<=F.len+STAIR&&z>=-DEPTH&&z<=CORR;}
 
 /* ====================== ДВИЖЕНИЕ ====================== */
 function pushOut(o,r,c){
@@ -980,6 +1660,7 @@ function nearDoor(){
 }
 function inDoorway(d){const hit=o=>Math.abs(o.x-d.x)<DOOR_W/2+0.3&&Math.abs(o.z)<0.58;return hit(P)||enemies.some(e=>e.dead<=0&&hit(e));}
 function useDoor(){
+  if(F&&F.home){if(S.state==='play')homeUse();return;}
   const d=nearDoor();if(!d||S.state!=='play')return;
   if(d.locked){
     if(!S.hasKey){say('locked');SND.hit();return;}
@@ -1356,7 +2037,7 @@ function updatePickups(dt){
 
 /* ====================== МЕНЮ: ночная школа в 3D ====================== */
 const menuWorld=new THREE.Group();scene.add(menuWorld);
-const gameSky=scene.background;
+const gameSky=scene.background,daySky=new THREE.Color(0x9fd4ff);
 const menuSky=canvasTex(4,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#060818');gr.addColorStop(0.55,'#1c1646');
   gr.addColorStop(0.85,'#4a2a62');gr.addColorStop(1,'#2a1c44');g.fillStyle=gr;g.fillRect(0,0,w,h);});
 const menuWins=[],runners=[],bats=[];
@@ -1432,6 +2113,7 @@ function updateMenu(dt){
 const S={state:'menu',toastT:0,klass:'normal',airJumps:0,prevJump:false,hasKey:false,won:false,winT:0,msgT:0,shake:0,fade:0,kills:0,time:0,mapT:0,lastRoom:null};
 function say(key,extra,time){$('msg').textContent=tr(key)+(extra||'');S.msgT=time||2.2;}
 function destroyFloors(){
+  leaveHome();
   floors.forEach(f=>{if(f)scene.remove(f.group);});F=null;
   floors.forEach(f=>{if(f)f.group.traverse(o=>{if(o.geometry)o.geometry.dispose();});});floors.length=0;signs.length=0;
   colliders=[];enemies=[];pickups=[];
@@ -1440,14 +2122,14 @@ function destroyFloors(){
 function place(x,z,yaw){Object.assign(P,{x,z,y:0,vy:0,yaw,pitch:0,cd:0,swing:0});S.st=null;}
 function startGame(){
   Object.assign(S,{state:'play',hasKey:false,won:false,winT:0,kills:0,time:0,fade:1,lastRoom:null});
-  destroyFloors();goFloor(1);
+  cut=null;$('cine').classList.add('hide');destroyFloors();goFloor(1);
   S.klass=save.klass;P.max=klass().hp;P.have={fists:true};P.ammo={};P.hp=P.max;P.inv=1;P.hurt=0;
   giveClassGun();
   if(ALL){ORDER.forEach(k=>{P.have[k]=true;if(WEAPONS[k].ammo)P.ammo[k]=99;});S.hasKey=true;}   // всё оружие и ключ сразу
   setWeapon(klass().gun?'toygun':'fists');
   for(let k=1;k<=PLAN.length;k++)if(!floors[k])floors[k]=buildFloor(k);   // все этажи сразу, чтобы на лестнице не было рывков
-  S.floorSeen=1;place(-0.5,CORR/2,-Math.PI/2);$('fade').textContent=tr('floor',1);show(null);say(S.hasKey?'goalOffice':'goalKey','',4);lock();
-  S.toastT=0;$('toast').textContent='';quest('floor',1,{floor:1});
+  goHome();place(8.3,UP+3.6,1.35);$('fade').textContent='';show(null);lock();wakeUp();
+  S.toastT=0;$('toast').textContent='';
 }
 function retry(){   // очнуться в классе поддержки; враги снова целые и стоят на местах
   floors.forEach(f=>{if(f)f.rooms.forEach(r=>{r.hurt=false;});});
@@ -1460,6 +2142,7 @@ function retry(){   // очнуться в классе поддержки; вр
 function changeFloor(n){goFloor(n);place(1,CORR/2,-Math.PI/2);S.floorSeen=n;S.lastRoom=null;}   // только для проверки
 /* Этажи стоят один над другим. На середине площадки «текущим» становится соседний этаж, а герой остаётся на месте. */
 function checkStairs(){
+  if(F.home)return;
   const a=stairAt(P.x,P.z),b=S.st;S.st=a;
   if(a&&b&&a.id===b.id&&a.u>a.s.u1-0.1&&(a.v<0)!==(b.v<0)){
     const d=b.v<0?1:-1,n=F.n+d;
@@ -1497,12 +2180,14 @@ addEventListener('keydown',e=>{
   if(c==='Space'||c.startsWith('Arrow'))e.preventDefault();
   if(S.state==='menu'&&c==='Escape')helpOpen(false);
   if(c==='Escape'||c==='KeyP'){if(S.state==='play')pause();else if(S.state==='pause')resume();}
+  if(S.state==='cut'&&!e.repeat&&(c==='Space'||c==='Enter'||c==='KeyE'))skipCut();
   if(S.state!=='play')return;
   if(c==='KeyE'&&!e.repeat)useDoor();
   if(c==='KeyQ')nextWeapon();
   if(c.startsWith('Digit')){const k=ORDER[+c.slice(5)-1];if(k&&usable(k))setWeapon(k);}
 });
 addEventListener('keyup',e=>{keys[e.code]=false;});
+$('cine').addEventListener('pointerdown',skipCut);
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;attackHeld=false;});
 if(isTouch){
   const st=$('stick'),knob=$('knob');let id=null,cx=0,cy=0;
@@ -1531,7 +2216,7 @@ function shopOpen(kind){menuPanel('shopBox');shopKind=kind;drawShop();SND.door()
 function show(id){
   ['menu','pause','dead','win'].forEach(s=>$(s).classList.toggle('hide',s!==id));
   if(id==='menu')helpOpen(false);
-  $('hud').classList.toggle('hide',S.state==='menu');
+  $('hud').classList.toggle('hide',S.state==='menu'||S.state==='cut');
   $('touch').classList.toggle('hide',!(isTouch&&S.state==='play'));
 }
 function pauseLabels(){   // подписи кнопок паузы (зависят от языка и настроек)
@@ -1615,6 +2300,8 @@ function updatePlayer(dt){
   else if(jump&&!S.prevJump&&S.airJumps>0){S.airJumps--;P.vy=6;burst(P.x,P.y+0.2,P.z,0xcfe0ff,6);quest('jump',1);}
   S.prevJump=jump;
   P.vy-=17*dt;P.y+=P.vy*dt;if(P.y<=g){P.y=g;P.vy=0;}
+  const roof=F.home?(P.x<0?2.75:(P.z>9||P.x<DOOR_X+0.3)?3:99):floorY(P.x,P.z)+ROOM_H;   // головой в потолок: камера не вылезает наружу
+  if(P.y+1.78>roof){P.y=Math.max(g,roof-1.78);P.vy=Math.min(P.vy,0);}
   P.cd=Math.max(0,P.cd-dt);P.inv=Math.max(0,P.inv-dt);P.swing=Math.max(0,P.swing-dt);
   if((attackHeld||keys.KeyJ)&&P.cd<=0)attack();
   if(l>0.05&&P.y<=g+0.02)P.bob+=dt*sp*2;
@@ -1629,9 +2316,9 @@ function updateCamera(){
 }
 function bossHere(){const r=roomAt(P.x,P.z);
   return enemies.find(e=>(e.kind==='boss'||e.kind==='strict')&&e.dead<=0&&e.awake&&r===e.home)||null;}
-const MAP_COLORS={stairs:'#96a8b4',support:'#78c878',korean:'#f0b45a',first:'#f082aa',office:'#d23c46',canteen:'#e1a046',cls:'#e1c88c',hall:'#aa82d2',
+const MAP_COLORS={stairs:'#96a8b4',support:'#78c878',korean:'#f0b45a',first:'#f082aa',office:'#d23c46',canteen:'#e1a046',wc:'#8cc8dc',cls:'#e1c88c',hall:'#aa82d2',
   teachers:'#64b4dc',english:'#e6a0be',strict:'#968ca0',pe:'#dc8c50',science:'#78d2c3'};
-const MAP_MARK={stairs:'▲▼',support:'♥',korean:'한',first:'1',office:'★',canteen:'食',hall:'♪',teachers:'✎',english:'ABC',strict:'A!',pe:'체',science:'H₂O'};
+const MAP_MARK={stairs:'▲▼',support:'♥',korean:'한',first:'1',office:'★',canteen:'食',wc:'WC',hall:'♪',teachers:'✎',english:'ABC',strict:'A!',pe:'체',science:'H₂O'};
 function drawMap(){   // круглая мини-карта: ты в центре, куда смотришь — то вверху
   const c=$('map'),g=c.getContext('2d'),size=c.width,R=size/2,k=9,L=F.len;   // k — точек на метр
   const X=x=>(x-P.x)*k,Z=z=>(z-P.z)*k;
@@ -1677,42 +2364,48 @@ function hud(dt){
   const w=WEAPONS[P.weapon],label=(P.weapon==='fists'&&klass().kick)?'kickName':P.weapon;
   $('weapon').textContent=tr(label)+(w.ammo?'  x'+(P.ammo[P.weapon]||0):'')+(S.hasKey?'  🔑':'')+'  ◉'+save.coins;
   const r=roomAt(P.x,P.z);
-  $('place').textContent=tr('floor',F.n)+' · '+(r?roomName(r):tr((P.x<0||P.x>F.len||P.z<-0.3)?'stairs':'corridor'));
+  $('place').textContent=F.home?tr(P.z>20?(P.x>11.2?'bath':P.x>2.7?'home':P.x<-0.3?'lift':'hall20'):P.x<-0.3?'lift':P.x<DOOR_X+0.2&&P.z>0?'lobby':P.z<-45.5-LONG?'yard':'street'):tr('floor',F.n)+' · '+(r?roomName(r):tr((P.x<0||P.x>F.len||P.z<-0.3)?'stairs':'corridor'));
   const boss=bossHere();
-  $('goal').textContent=tr((r&&r.type==='office')?'goalBoss':(S.hasKey?'goalOffice':'goalKey'));
+  $('goal').textContent=F.home&&!morningDone()?tr('goalMorning')+': '+jobsLeft().map(k=>tr('job_'+k)).join(' · '):tr(F.home?(!F.ate?'goalEat':!F.flatOpen?'goalExit':F.lift.at==='up'?'goalLift':!F.out?'goalLobby':(F.gang&&F.gang.stage==='ice')?(F.gang.have?'goalGive':'goalIce'):'goalSchool'):(r&&r.type==='office')?'goalBoss':(S.hasKey?'goalOffice':'goalKey'));
   $('boss').classList.toggle('hide',!boss);
   if(boss){$('bossfill').style.width=Math.max(0,boss.hp/boss.max*100)+'%';$('bossname').textContent=tr(boss.kind==='boss'?'bossName':'strictName');}
-  const d=nearDoor();
-  $('hint').textContent=d?tr(d.locked&&!S.hasKey?'lockedHint':(d.open?'closeHint':'openHint')):'';
-  $('tDoor').classList.toggle('hide',!d);
+  const d=nearDoor(),spot=F.home?homeSpot():null;
+  $('hint').textContent=spot?tr(spot.hint):d?tr(d.locked&&!S.hasKey?'lockedHint':(d.open?'closeHint':'openHint')):'';
+  $('tDoor').classList.toggle('hide',!d&&!spot);
+  $('map').style.display=F.home?'none':'';
   if(S.msgT>0){S.msgT-=dt;if(S.msgT<=0)$('msg').textContent='';}
   if(S.toastT>0){S.toastT-=dt;if(S.toastT<=0)$('toast').textContent='';}
-  S.mapT-=dt;if(S.mapT<=0){S.mapT=0.033;drawMap();}
+  S.mapT-=dt;if(S.mapT<=0&&!F.home){S.mapT=0.033;drawMap();}
 }
 function update(dt){
+  if(S.state==='cut'){if(hc)updateHC(dt);else updateCut(dt);return;}
   if(S.state!=='play')return;
   S.time+=dt;
   updateDoors(dt);updatePlayer(dt);
+  if(F.home){updateLift(dt);updateStreet(dt);updateGang(dt);updateSchoolDoor(dt);if(atSchoolDoor()){enterSchool();return;}}
   const r=roomAt(P.x,P.z);
-  if(r!==S.lastRoom){S.lastRoom=r;if(r&&r.safe)say('safe');if(r&&r.id==='5-1')say('npc','',4.5);}
+  if(r!==S.lastRoom){S.lastRoom=r;if(r&&r.safe)say('safe');if(r&&r.id==='5-1')say('npc','',4.5);if(r&&r.type==='office'&&!S.won)say('gHelp','',3);}
   for(const e of [...enemies]){if(Math.abs(e.x-P.x)<34||e.dead>0)updateEnemy(e,dt);if(S.state!=='play')return;}
   updateProjectiles(dt);if(S.state!=='play')return;
   updatePickups(dt);updateParticles(dt);
-  if(S.won){S.winT-=dt;if(S.winT<=0){S.state='win';earn(100);show('win');unlock();}}
+  if(S.won){S.winT-=dt;if(S.winT<=0){S.won=false;finalCut(()=>{S.state='win';earn(100);show('win');unlock();});}}
 }
 function render(dt){
   S.shake=Math.max(0,S.shake-dt);P.hurt=Math.max(0,P.hurt-dt);
   const inMenu=S.state==='menu';
-  menuWorld.visible=inMenu;floors.forEach(f=>{if(f)f.group.visible=!inMenu;});
-  scene.background=inMenu?menuSky:gameSky;scene.fog.color.setHex(inMenu?0x241a40:0x2a2040);scene.fog.near=inMenu?30:28;scene.fog.far=inMenu?85:60;
+  menuWorld.visible=inMenu;floors.forEach(f=>{if(f)f.group.visible=!inMenu;});if(HOME)HOME.group.visible=!inMenu;
+  const day=!inMenu&&!!F.home;
+  scene.background=inMenu?menuSky:day?daySky:gameSky;scene.fog.color.setHex(inMenu?0x241a40:day?0xc4e4ff:0x2a2040);scene.fog.near=inMenu?30:day?36:28;scene.fog.far=inMenu?85:day?95:60;
   if(inMenu)updateMenu(dt);
   else{updateCamera();hud(dt);$('hurt').style.opacity=Math.min(1,P.hurt*1.8);}
-  view.visible=S.state!=='menu';
-  if(S.fade>0)S.fade=Math.max(0,S.fade-dt*1.4);
+  view.visible=S.state!=='menu'&&S.state!=='cut';
+  if(S.blink){const b=hc?hc.t:9;if(b>2.4)S.blink=0;   // глаза открываются: темно, моргнул, ещё раз
+    S.fade=b<0.8?1:b<1.6?0.35+0.3*Math.abs(Math.cos(b*6)):b<2.4?0.15*Math.abs(Math.sin(b*7)):0;S.fade/=1.5;$('fade').textContent='';}
+  else if(S.fade>0)S.fade=Math.max(0,S.fade-dt*1.4);
   $('fade').style.opacity=Math.min(1,S.fade*1.5);
-  alignFloors();
-  const eye=camera.position.x,close=Math.abs(P.x-anchor(F,nearStair()))<10;
-  floors.forEach(f=>{if(f&&Math.abs(f.n-F.n)<=1)cullFloor(f,f===F?30:close?16:0,eye-f.group.position.x);});
+  if(!F.home){alignFloors();
+    const eye=camera.position.x,close=Math.abs(P.x-anchor(F,nearStair()))<10;
+    floors.forEach(f=>{if(f&&Math.abs(f.n-F.n)<=1)cullFloor(f,f===F?30:close?16:0,eye-f.group.position.x);});}
   updateLights(!inMenu);
   renderer.render(scene,camera);
 }
@@ -1724,7 +2417,7 @@ function loop(now){
 buildMenu();dressHero();goFloor(1);applyLang();setWeapon('fists');show('menu');requestAnimationFrame(loop);
 // для проверки из консоли (и автоматических тестов)
 window.ZS={S,P,PLAN,WEAPONS,KINDS,keys,camera,renderer,scene,floors,get floor(){return F;},get enemies(){return enemies;},
-  startGame,retry,update,render,attack,spawnEnemy,quest,ensureQuests,save,CLASSES,SKINS,shopOpen,pickItem,useDoor,setWeapon,nextWeapon,damage,hurtPlayer,changeFloor,goFloor,pause,resume,toMenu,
+  startGame,retry,update,render,enterSchool,get hc(){return hc;},endHC,endCut,get cut(){return cut;},attack,spawnEnemy,quest,ensureQuests,save,CLASSES,SKINS,shopOpen,pickItem,useDoor,setWeapon,nextWeapon,damage,hurtPlayer,changeFloor,goFloor,pause,resume,toMenu,
   setLang:l=>{lang=l;applyLang();},T};
 </script>
 </body>
